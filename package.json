@@ -1,7 +1,7 @@
 {
-  "name": "picodex",
+  "name": "3dsdex",
   "private": true,
-  "version": "0.12.0",
+  "version": "0.1.0",
   "type": "module",
   "scripts": {
     "dev": "vite",
@@ -32,6 +32,6 @@
     "vite": "^8.1.1",
     "vitest": "^4.1.10"
   },
-  "description": "Manage your Pico Launcher SD card from the browser: covers, favorites, stats and more",
+  "description": "Manage, audit, and update your Nintendo 3DS SD card or local backup folder from the browser",
   "license": "MIT"
 }

@@ -1,71 +1,37 @@
-# PicoDex
+# 3DSdex
 
-<img src="docs/logo.png" width="96" align="right" alt="" />
-
-[![CI](https://github.com/rasalopa/picodex/actions/workflows/ci.yml/badge.svg)](https://github.com/rasalopa/picodex/actions/workflows/ci.yml)
-[![Deploy](https://github.com/rasalopa/picodex/actions/workflows/deploy.yml/badge.svg)](https://rasalopa.github.io/picodex/)
-[![Release](https://img.shields.io/github/v/release/rasalopa/picodex?color=e04b62)](https://github.com/rasalopa/picodex/releases)
-[![License](https://img.shields.io/github/license/rasalopa/picodex)](LICENSE)
-
-English | [Deutsch](README.de.md)
-
-> Manage your [Pico Launcher](https://github.com/LNH-team/pico-launcher) SD card from the browser, on the [DSpico](https://github.com/LNH-team/dspico) or any flashcart that runs it. Covers, library organization, favorites and play stats. No install, no backend, your files never leave your machine.
-
-![Library overview with per-system cover coverage](docs/screenshots/library.png)
-
-<table>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/gallery.jpg" alt="Cover gallery with favorites and play badges" /></td>
-    <td width="50%"><img src="docs/screenshots/cover-picker.jpg" alt="Manual cover picker with catalog search" /></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/stats.png" alt="Play statistics from Pico Launcher Enhanced" /></td>
-    <td width="50%"><img src="docs/screenshots/health.png" alt="Card health check reporting which Pico Loader release the card is running" /></td>
-  </tr>
-  <tr>
-    <td width="50%"><img src="docs/screenshots/compat.jpg" alt="Per-game loader compatibility: anti-piracy fix, save type and size, game patches" /></td>
-    <td width="50%"><img src="docs/screenshots/landing.png" alt="PicoDex landing page with its feature cards" /></td>
-  </tr>
-  <tr>
-    <td colspan="2"><img src="docs/screenshots/screenshots.jpg" alt="Screenshot gallery: every capture on the card, both DS screens stacked into one picture" /></td>
-  </tr>
-</table>
+> Manage and update your Nintendo 3DS CFW SD card or local folder from the browser: Luma3DS, GodMode9, homebrew tools, and SD maintenance. A fork of [PicoDex](https://github.com/rasalopa/picodex) built for personal maintenance and educational use. No install, no backend — your files never leave your machine.
 
 ## What it does
 
-- 📂 **Open your SD card** directly in the browser (File System Access API) and see your whole library at a glance: games per system, cover coverage and, if you use [Pico Launcher Enhanced](https://github.com/rasalopa/pico-launcher-enhanced), your favorites, completed games and play stats (which you can also edit by hand for corrections).
-- 🖼 **Cover manager**: finds games without box art, matches them against the [libretro-thumbnails](https://github.com/libretro-thumbnails) catalogs (No-Intro naming, region-aware), previews the result and writes launcher-ready BMPs to `/_pico/covers/`.
-- 🎮 **Library organizer**: drop ROM files onto the page and PicoDex detects the system, places them under `Games/`, and fetches their covers.
-- 📁 **Folder banners**: give each system folder a proper icon and display name (`banner.bnr`), generated in the browser.
-- 🔗 **File association editor**: point each ROM extension at its emulator without hand-editing `settings.json`.
-- 🩺 **Card health check**: finds macOS junk files, missing loader files and orphaned saves or covers. Nothing is deleted without confirmation. It also identifies which [Pico Loader](https://github.com/LNH-team/pico-loader) release your card is running, and spots a card whose loader files came from different releases.
-- 📸 **Screenshot gallery**: every capture [Pico Launcher Enhanced](https://github.com/rasalopa/pico-launcher-enhanced) saves when you hold START, both DS screens stacked into one picture. View one full size, save it as a PNG, or delete it from the card.
-- 🎮 **Per-game loader compatibility**: for any NDS game, what the loader will do for it at boot (anti-piracy fix, save type and size, game-specific patches), matched against your ROM's exact revision.
+- **Flexible SD or local folder selection**: open your Nintendo 3DS SD card or a local backup/working folder directly in the browser to test changes safely before touching your console.
+- **CFW & homebrew overview**: inspect key Nintendo 3DS CFW components and paths (`boot.firm`, `boot.3dsx`, `/luma/`, `/gm9/`, `/3ds/`, `/cias/`), with strict protection for `/Nintendo 3DS/` and `/boot9strap/`.
+- **SD health & cleanup**: detects OS junk files (such as `._*`, `.DS_Store`, `.fseventsd` without `no_log`, `.Trashes`, and `.Spotlight-V100`), misplaced `.cia` and `.3dsx` files in the SD root, and missing essential files, with two-step confirmation before deleting anything.
+- **FBI / NSA detection rule**: if an `FBI` setup is detected without `NSA`, recommends checking out [NSA](https://github.com/tinaut1986/NSA); if `NSA` is already present, stays quiet.
+- **Browser compatibility (Chromium + Firefox)**: supports direct read/write access via the File System Access API in Chromium-based browsers, and a compatible folder mode with `.zip` export for Firefox and other browsers without directory write support.
 
-Everything runs client-side. PicoDex has no server, no accounts and no telemetry.
+Everything runs client-side. 3DSdex has no server, no accounts, and no telemetry.
 
 ## Requirements
 
-- A Chromium-based browser (Chrome, Edge, Brave, Opera). Firefox and Safari do not yet ship the directory-write File System Access API.
-- A Pico Launcher SD card: any flashcart with a `/_pico` folder: the DSpico, or an R4, DSTT, Acekard, etc. running Pico Launcher.
+- **Browsers**:
+  - **Chromium-based browsers** (Chrome, Edge, Brave, Opera) for direct folder/SD access via the File System Access API.
+  - **Firefox** (and other browsers without directory write support) via compatible folder mode with `.zip` export.
+- **Storage target**: a Nintendo 3DS SD card (Old/New 3DS with CFW) or a local copy/working folder.
 
 ## Using it
 
-**Use it now: https://rasalopa.github.io/picodex/**. No install needed.
-
-Or run it locally:
+Run it locally:
 
 ```bash
-git clone https://github.com/rasalopa/picodex.git
-cd picodex
+git clone https://github.com/SoyAndreb/3DSdex
+cd 3dsdex
 npm install
 npm run dev
+
 ```
 
-Open the printed URL, click **Open SD card**, and pick your mounted SD.
-
-PicoDex opens in its dark theme. The button next to the language in the footer switches it to
-light, or lets it follow your system.
+Open the printed URL, select **your SD card or a local working/backup folder**, and run a scan.
 
 ## Development
 
@@ -75,18 +41,22 @@ npm test             # unit tests (vitest)
 npm run lint         # oxlint
 npm run format:check # prettier
 npm run build        # production build
+
 ```
 
-The interesting logic lives in [`src/lib/`](src/lib/) as pure, dependency-free TypeScript: NDS/GBA header parsing, launcher-format BMP encoding, `banner.bnr` building, box-art title matching, and the Pico Launcher `gamedata.json`/`settings.json` formats. The React app is a thin shell over it.
+Core logic lives in `src/lib/` (`sd3ds.ts`, `sdAudit.ts`, `compatFs.ts`, `zipExport.ts`) alongside state management in `src/state/` and views in `src/views/`.
 
-See [CONTRIBUTING.md](CONTRIBUTING.md) if you want to help, and [CHANGELOG.md](CHANGELOG.md) for what each
-release brought.
+## Current Status
+
+* **Phase 1 & Phase 2 completed**: 3DSdex rebranding, flexible SD/local folder picker, Chromium + Firefox compatibility (`compatFs.ts` and `zipExport.ts`), protected system paths, SD health auditing, and FBI/NSA detection logic.
+* **Upcoming phases**: SHA-256 CFW release verification (`Luma3DS`, `GodMode9`, Homebrew Launcher), safe pre-overwrite backups (`safeBackup.ts`), homebrew/payload management, and Luma screenshot support.
 
 ## Acknowledgements
 
-- The [LNH team](https://github.com/LNH-team) for the DSpico, the open flashcart that makes this fun, and for Pico Launcher.
-- [libretro-thumbnails](https://github.com/libretro-thumbnails) for the box art collections.
+* [rasalopa/picodex](https://github.com/rasalopa/picodex) for the original project architecture and UI foundation.
+* [3ds.hacks.guide](https://3ds.hacks.guide/) for Nintendo 3DS CFW layout and best-practice documentation.
+* [tinaut1986/NSA](https://github.com/tinaut1986/NSA) for the NSA title manager project.
 
 ## License
 
-[MIT](LICENSE)
+[MIT](https://www.google.com/search?q=LICENSEMIT)
