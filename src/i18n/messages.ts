@@ -29,6 +29,10 @@ export function resolveSdMessage(t: Dict, message: SdMessage): string {
       return t.sd.noPicoPickRoot;
     case 'noPicoOnCard':
       return t.sd.noPicoOnCard;
+    case 'not3dsAnymore':
+      return t.sd.not3dsAnymore;
+    case 'not3dsPickRoot':
+      return t.sd.not3dsPickRoot;
     case 'fsDenied':
       return t.sd.fsDenied;
     case 'fsNotFound':

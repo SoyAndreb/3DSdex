@@ -8,15 +8,15 @@ import type { Dict } from './en';
 export const es: Dict = {
   app: {
     tabs: {
-      library: 'Biblioteca',
+      library: 'CFW y Arranque',
       covers: 'Carátulas',
       stats: 'Pico Enhanced',
       associations: 'Asociaciones',
-      screenshots: 'Capturas',
-      health: 'Salud',
+      screenshots: 'Capturas Luma',
+      health: 'Salud y Auditoría',
     },
     sections: 'Secciones',
-    openSdFolder: 'La tarjeta SD que tienes abierta',
+    openSdFolder: 'La tarjeta SD o carpeta local que tienes abierta',
     reload: 'Recargar',
     reloading: 'Recargando…',
     whatsNew: 'Novedades',
@@ -33,50 +33,57 @@ export const es: Dict = {
   },
   welcome: {
     tagline:
-      'Gestiona tu tarjeta SD de Pico Launcher desde el navegador — en el DSpico o cualquier flashcart que lo ejecute. Tus archivos nunca salen de tu equipo.',
-    openSd: 'Abrir tarjeta SD',
+      'Audita, organiza y actualiza la tarjeta SD de tu Nintendo 3DS o una carpeta local de trabajo/respaldo desde el navegador. Tus archivos nunca salen de tu equipo.',
+    openSd: 'Abrir tarjeta SD o carpeta local',
     opening: 'Abriendo…',
     openLast: (name: string) => `Abrir ${name}`,
-    lastCardReady: 'La tarjeta que tenías abierta la última vez.',
+    lastCardReady: 'La tarjeta SD o carpeta que tenías abierta la última vez.',
     lastCardAskAgain:
-      'La tarjeta que tenías abierta la última vez. Tu navegador volverá a pedir acceso.',
-    pickDifferent: 'Elegir otra tarjeta',
+      'La tarjeta SD o carpeta que tenías abierta la última vez. Tu navegador volverá a pedir acceso.',
+    pickDifferent: 'Elegir otra SD o carpeta',
     unsupported:
-      'Tu navegador no puede abrir carpetas de tu equipo, y PicoDex lo necesita para leer tu tarjeta SD. Abre esta página con Chrome, Edge u Opera en un equipo de escritorio o portátil.',
+      'Tu navegador no permite escritura directa en carpetas — 3DSdex abrirá tu tarjeta SD o carpeta local en Modo Compatible (Firefox) para que puedas exportar los cambios en un .zip.',
     waitingForFolder: 'Esperando la carpeta…',
-    whatsNewButton: 'Novedades de PicoDex',
+    whatsNewButton: 'Novedades de 3DSdex',
     features: {
-      boxArtTitle: 'Carátulas',
-      boxArtBody: 'Encuentra los juegos sin carátula y baja el arte listo para el launcher.',
-      libraryTitle: 'Tu biblioteca',
+      boxArtTitle: 'Respaldo seguro',
+      boxArtBody:
+        'Respalda boot.firm, boot.3dsx y payloads antes de sobrescribir archivos críticos.',
+      libraryTitle: 'Auditoría de SD',
       libraryBody:
-        'Todos los sistemas de tu tarjeta de un vistazo, y cuántos de sus juegos tienen carátula.',
-      statsTitle: 'Estadísticas de juego',
-      statsBody: 'Favoritos, más jugados y jugados recientemente, si usas Pico Launcher Enhanced.',
-      healthTitle: 'Salud de la tarjeta',
+        'Detecta basura del sistema, archivos .cia/.3dsx sueltos y componentes CFW faltantes.',
+      statsTitle: 'Control de versiones',
+      statsBody:
+        'Comprueba Luma3DS, GodMode9 y Homebrew Launcher frente a las últimas versiones.',
+      healthTitle: 'Detección FBI / NSA',
       healthBody:
-        'Detecta la basura de macOS, guardados huérfanos y un loader con archivos de versiones distintas.',
-      bannersTitle: 'Banners de carpeta',
+        'Detecta carpetas de FBI y recomienda instalar NSA moderno si aún no lo tienes.',
+      bannersTitle: 'Carpeta de trabajo',
       bannersBody:
-        'Dale a cada carpeta de sistema su icono y nombre visible. Necesita un Pico Launcher más nuevo que la v1.3.0.',
-      associationsTitle: 'Asociaciones de archivos',
-      associationsBody: 'Elige qué emulador abre cada tipo de ROM, sin editar archivos a mano.',
+        'Prueba limpiezas y organización en una copia local de respaldo antes de pasarla a tu 3DS.',
+      associationsTitle: 'Compatible con Firefox',
+      associationsBody:
+        'Funciona sin File System Access API exportando un .zip listo para extraer en tu SD.',
     },
   },
   sd: {
-    scanningLibrary: 'Escaneando la biblioteca…',
-    scanningLibraryCount: (count: number) => `Escaneando la biblioteca… ${count} archivos`,
+    scanningLibrary: 'Escaneando tarjeta SD 3DS…',
+    scanningLibraryCount: (count: number) => `Escaneando tarjeta SD 3DS… ${count} archivos`,
     readingCovers: 'Leyendo carátulas…',
-    readingLauncherData: 'Leyendo datos del launcher…',
-    waitingAccess: 'Esperando acceso a la tarjeta…',
+    readingLauncherData: 'Inspeccionando estructura CFW 3DS…',
+    waitingAccess: 'Esperando acceso a la carpeta…',
     needsAccess: (name: string) =>
-      `PicoDex necesita tu permiso para abrir ${name}. Pulsa de nuevo Abrir ${name} y permite el acceso cuando el navegador te lo pida.`,
+      `3DSdex necesita tu permiso para abrir ${name}. Pulsa de nuevo Abrir ${name} y permite el acceso cuando el navegador te lo pida.`,
     noPicoAnymore:
-      'PicoDex no encuentra la carpeta /_pico en esa tarjeta. Si la tarjeta no está conectada, conéctala primero. Después pulsa Abrir tarjeta SD y elígela.',
+      '3DSdex ya no encuentra esa carpeta. Conecta tu tarjeta SD o vuelve a elegir tu carpeta local.',
     noPicoPickRoot:
-      'PicoDex no encuentra una carpeta /_pico ahí. Elige la raíz de la tarjeta SD. Si ya lo hiciste, Pico Launcher aún no está instalado en esta tarjeta.',
+      '3DSdex no pudo reconocer una tarjeta SD de 3DS o carpeta de respaldo ahí.',
     noPicoOnCard:
-      'PicoDex no pudo guardar el cambio porque ya no encuentra la carpeta /_pico en la tarjeta. Comprueba que la tarjeta sigue conectada y pulsa Recargar.',
+      '3DSdex no pudo guardar el cambio porque la carpeta ya no es accesible.',
+    not3dsAnymore:
+      '3DSdex ya no reconoce una tarjeta SD de 3DS ni una carpeta de respaldo ahí. Vuelve a conectarla y pulsa Recargar.',
+    not3dsPickRoot:
+      '3DSdex no encontró archivos o carpetas estándar de 3DS (como boot.firm, luma/ o Nintendo 3DS/) ahí. Elige la raíz de tu tarjeta SD o carpeta local de respaldo.',
     fsDenied:
       'Tu equipo no dejó que PicoDex usara un archivo o carpeta de la tarjeta. Normalmente significa que la tarjeta está bloqueada o en solo lectura. Revisa el interruptor de bloqueo del lateral de la tarjeta SD o de su adaptador, desbloquéala si hace falta, vuelve a conectar la tarjeta y pulsa Recargar.',
     fsNotFound:
@@ -649,5 +656,49 @@ export const es: Dict = {
     folderGone: 'La carpeta de capturas ya no está en la tarjeta.',
     deleteError: (message: string) => `No se pudo borrar: ${message}`,
     deleted: (name: string) => `${name} borrada de la tarjeta.`,
+  },
+  dex3ds: {
+    compatBanner:
+      'Modo Compatible (Firefox / solo lectura): los cambios se preparan en memoria hasta que los exportes.',
+    compatOpenBtn: 'Abrir carpeta en Modo Compatible (Firefox / .zip)',
+    compatExportBtn: (count: number) =>
+      count > 0 ? `Exportar cambios (.zip · ${count})` : 'Exportar .zip (sin cambios aún)',
+    compatPending: (written: number, deleted: number) =>
+      `${written} modificados/añadidos · ${deleted} marcados para eliminar`,
+    auditTitle: 'Salud y Auditoría SD 3DS',
+    auditIntro:
+      'Verifica archivos críticos de arranque (boot.firm, boot.3dsx, GodMode9), basura del sistema, .cia/.3dsx desubicados y estado de FBI/NSA.',
+    rescan: 'Reescanear SD',
+    scanning: (count: number) => `Escaneando… ${count} archivos`,
+    criticalTitle: 'Archivos críticos de arranque y CFW',
+    bootFirmOk: 'boot.firm (Luma3DS) presente en la raíz de la SD.',
+    bootFirmMissing:
+      'Falta boot.firm en la raíz de la SD — la consola podría no arrancar sin Luma en CTRNAND.',
+    boot3dsxOk: 'boot.3dsx (Homebrew Launcher) presente en la raíz de la SD.',
+    boot3dsxMissing: 'Falta boot.3dsx en la raíz de la SD.',
+    gm9Ok: 'Payload GodMode9 encontrado en /luma/payloads/.',
+    gm9Missing: 'No se encontró payload GodMode9 (.firm) en /luma/payloads/.',
+    lumaConfigOk: '/luma/config.ini presente.',
+    lumaConfigMissing: 'No se encontró /luma/config.ini (se crea al iniciar Luma3DS).',
+    fbiNsaTitle: 'Gestor de títulos (FBI / NSA)',
+    fbiNsaRecommend:
+      'Se detectó una carpeta de FBI sin NSA. Recomendamos instalar NSA, un fork moderno de FBI con transferencias 3DS a 3DS y actualizador integrado.',
+    fbiNsaLink: 'Ver NSA en GitHub',
+    misplacedTitle: 'Archivos sueltos en la raíz de la SD',
+    misplacedNone: 'No hay archivos .cia ni .3dsx sueltos en la raíz.',
+    misplacedHint:
+      'Los archivos .cia y .3dsx en la raíz desordenan la SD. Muévelos a /cias/ y /3ds/ respectivamente.',
+    moveToSuggested: 'Mover a carpeta estándar',
+    moving: 'Moviendo…',
+    movedCount: (count: number) => `Se movieron ${count} archivo(s) a sus carpetas estándar.`,
+    junkTitle: 'Basura del sistema y archivos residuales',
+    junkNone: 'No se detectaron archivos basura de macOS o del sistema.',
+    junkClean: 'Eliminar basura del sistema',
+    junkConfirm: (count: number) => `¿Eliminar ${count} elemento(s) basura?`,
+    cfwPreviewTitle: 'Resumen CFW y Arranque',
+    cfwPreviewBody:
+      'Estructura detectada en tu tarjeta SD o carpeta local de respaldo. La identificación por SHA-256 y actualización con respaldo automático llegarán en la Fase 3.',
+    protectedNote:
+      'Las carpetas protegidas (/Nintendo 3DS/ y /boot9strap/) nunca se modifican ni se analizan para borrado.',
   },
 };

@@ -18,15 +18,15 @@
 export const en = {
   app: {
     tabs: {
-      library: 'Library',
+      library: 'CFW & Boot',
       covers: 'Covers',
       stats: 'Pico Enhanced',
       associations: 'Associations',
-      screenshots: 'Screenshots',
-      health: 'Health',
+      screenshots: 'Luma Captures',
+      health: 'SD Audit & Health',
     },
     sections: 'Sections',
-    openSdFolder: 'The SD card you have open',
+    openSdFolder: 'The SD card or local folder you have open',
     reload: 'Reload',
     reloading: 'Reloading…',
     whatsNew: "What's new",
@@ -45,50 +45,55 @@ export const en = {
   },
   welcome: {
     tagline:
-      'Manage your Pico Launcher SD card from the browser — on the DSpico or any flashcart that runs it. Your files never leave your machine.',
-    openSd: 'Open SD card',
+      'Audit, organize, and update your Nintendo 3DS SD card or local backup folder from the browser. Your files never leave your machine.',
+    openSd: 'Open SD card or local folder',
     opening: 'Opening…',
     openLast: (name: string) => `Open ${name}`,
-    lastCardReady: 'The card you had open last time.',
-    lastCardAskAgain: 'The card you had open last time. Your browser will ask for access again.',
-    pickDifferent: 'Pick a different card',
+    lastCardReady: 'The SD card or folder you had open last time.',
+    lastCardAskAgain:
+      'The SD card or folder you had open last time. Your browser will ask for access again.',
+    pickDifferent: 'Pick a different SD or folder',
     unsupported:
-      "Your browser can't open folders on your computer, and PicoDex needs that to read your SD card. Open this page in Chrome, Edge or Opera on a desktop or laptop computer.",
+      'Your browser does not support direct folder writing — 3DSdex will open your SD card or local folder in Compatible Mode (Firefox) and let you export changes as a .zip.',
     waitingForFolder: 'Waiting for folder…',
-    whatsNewButton: "What's new in PicoDex",
+    whatsNewButton: "What's new in 3DSdex",
     features: {
-      boxArtTitle: 'Box art',
-      boxArtBody: 'Finds games without covers and fetches launcher-ready art.',
-      libraryTitle: 'Your library',
-      libraryBody: 'Every system on your card at a glance, and how many of its games have a cover.',
-      statsTitle: 'Play stats',
-      statsBody:
-        'Favorites, most played and recently played games, if you use Pico Launcher Enhanced.',
-      healthTitle: 'Card health',
+      boxArtTitle: 'Safe backups',
+      boxArtBody: 'Backs up boot.firm, boot.3dsx, and payloads before overwriting critical files.',
+      libraryTitle: 'SD card audit',
+      libraryBody:
+        'Detects OS junk, misplaced .cia/.3dsx files, and missing CFW components at a glance.',
+      statsTitle: 'CFW version check',
+      statsBody: 'Verifies Luma3DS, GodMode9, and Homebrew Launcher against official releases.',
+      healthTitle: 'FBI / NSA check',
       healthBody:
-        'Spots macOS junk, orphaned saves, and a loader whose files came from different releases.',
-      bannersTitle: 'Folder banners',
+        'Spots legacy FBI folders and recommends modern NSA when it is not installed yet.',
+      bannersTitle: 'Local backup workflow',
       bannersBody:
-        'Give each system folder a proper icon and display name. Needs a Pico Launcher newer than v1.3.0.',
-      associationsTitle: 'File associations',
+        'Test cleanup and organization safely on a local copy before moving changes to your 3DS.',
+      associationsTitle: 'Firefox compatible',
       associationsBody:
-        'Choose which emulator opens each type of ROM, without editing files by hand.',
+        'Works without File System Access API by exporting a ready-to-extract .zip archive.',
     },
   },
   sd: {
-    scanningLibrary: 'Scanning game library…',
-    scanningLibraryCount: (count: number) => `Scanning game library… ${count} files`,
+    scanningLibrary: 'Scanning 3DS SD card…',
+    scanningLibraryCount: (count: number) => `Scanning 3DS SD card… ${count} files`,
     readingCovers: 'Reading covers…',
-    readingLauncherData: 'Reading launcher data…',
-    waitingAccess: 'Waiting for access to the card…',
+    readingLauncherData: 'Inspecting 3DS CFW structure…',
+    waitingAccess: 'Waiting for access to the folder…',
     needsAccess: (name: string) =>
-      `PicoDex needs your permission to open ${name}. Press Open ${name} again and allow access when your browser asks.`,
+      `3DSdex needs your permission to open ${name}. Press Open ${name} again and allow access when your browser asks.`,
     noPicoAnymore:
-      "PicoDex can't find the /_pico folder on that card. If the card isn't connected, connect it first. Then press Open SD card and choose it.",
+      "3DSdex can't find that folder any more. Connect your SD card or pick your local folder again.",
     noPicoPickRoot:
-      "PicoDex can't find a /_pico folder there. Choose the root of the SD card, not a folder inside it. If you already did, Pico Launcher isn't set up on this card yet.",
+      "3DSdex couldn't recognize a 3DS SD card or backup folder there.",
     noPicoOnCard:
-      "PicoDex couldn't save your change because it can't find the /_pico folder on the card any more. Check that the card is still connected, then press Reload.",
+      "3DSdex couldn't save your change because the folder is no longer accessible.",
+    not3dsAnymore:
+      "3DSdex no longer recognizes a 3DS SD card or backup folder there. Connect it again and press Reload.",
+    not3dsPickRoot:
+      "3DSdex didn't find standard 3DS folders or boot files (like boot.firm, luma/, or Nintendo 3DS/) there. Pick the root of your SD card or local backup folder.",
     fsDenied:
       'Your computer blocked PicoDex from a file or folder on the card. Usually this means the card is locked or read-only. Check the lock switch on the side of the SD card or its adapter, unlock it if needed, then reconnect the card and press Reload.',
     fsNotFound:
@@ -663,6 +668,49 @@ export const en = {
     folderGone: 'The screenshots folder is not on the card any more.',
     deleteError: (message: string) => `Could not delete it: ${message}`,
     deleted: (name: string) => `${name} deleted from the card.`,
+  },
+  dex3ds: {
+    compatBanner:
+      'Compatible Mode (Firefox / read-only): changes are staged in memory until you export them.',
+    compatOpenBtn: 'Open folder in Compatible Mode (Firefox / .zip)',
+    compatExportBtn: (count: number) =>
+      count > 0 ? `Export changes (.zip · ${count})` : 'Export .zip (no changes yet)',
+    compatPending: (written: number, deleted: number) =>
+      `${written} modified/added · ${deleted} marked for removal`,
+    auditTitle: '3DS SD Audit & Health',
+    auditIntro:
+      'Checks critical boot files (boot.firm, boot.3dsx, GodMode9), OS junk, misplaced .cia/.3dsx files, and FBI/NSA status.',
+    rescan: 'Rescan SD',
+    scanning: (count: number) => `Scanning… ${count} files`,
+    criticalTitle: 'Critical CFW & Boot Files',
+    bootFirmOk: 'boot.firm (Luma3DS) present at SD root.',
+    bootFirmMissing: 'boot.firm is missing at SD root — console may not boot without CTRNAND Luma.',
+    boot3dsxOk: 'boot.3dsx (Homebrew Launcher) present at SD root.',
+    boot3dsxMissing: 'boot.3dsx is missing at SD root.',
+    gm9Ok: 'GodMode9 payload found in /luma/payloads/.',
+    gm9Missing: 'No GodMode9 .firm payload found in /luma/payloads/.',
+    lumaConfigOk: '/luma/config.ini present.',
+    lumaConfigMissing: '/luma/config.ini not found (created on first Luma3DS boot).',
+    fbiNsaTitle: 'Title Manager (FBI / NSA)',
+    fbiNsaRecommend:
+      'Legacy FBI folder detected without NSA. We recommend installing NSA, a modern fork of FBI with 3DS-to-3DS transfers and built-in updater.',
+    fbiNsaLink: 'Open NSA on GitHub',
+    misplacedTitle: 'Misplaced files at SD root',
+    misplacedNone: 'No loose .cia or .3dsx files at SD root.',
+    misplacedHint:
+      'Loose .cia and .3dsx files at the root clutter the SD card. Move them to /cias/ and /3ds/ respectively.',
+    moveToSuggested: 'Move to standard folder',
+    moving: 'Moving…',
+    movedCount: (count: number) => `Moved ${count} file(s) to standard folders.`,
+    junkTitle: 'OS Junk & Leftover Files',
+    junkNone: 'No macOS or OS junk files detected.',
+    junkClean: 'Delete OS junk',
+    junkConfirm: (count: number) => `Delete ${count} junk item(s)?`,
+    cfwPreviewTitle: 'CFW & Boot Overview',
+    cfwPreviewBody:
+      'Detected structure from your SD card or local backup folder. Full SHA-256 version identification and safe backup updates arrive in Phase 3.',
+    protectedNote:
+      'Protected folders (/Nintendo 3DS/ and /boot9strap/) are never modified or scanned for deletion.',
   },
 };
 

@@ -11,37 +11,34 @@ import { fsMessage } from './fsMessage';
 import type { ReactNode } from 'react';
 import { forgetCard, loadLastCard, rememberCard } from '../lib/lastCard';
 import {
-  parseGameData,
   serializeGameData,
   setGameStats,
   toggleFlag,
   type GameData,
   type GameStats,
 } from '../lib/gamedata';
-import { isEnhancedLauncher, parseLoaderApiVersion, parseNdsRomTitle } from '../lib/loader';
-import { parseApList, parsePatchList, parseSaveList, type LoaderLists } from '../lib/loaderlists';
-import { readSettingsBytes, type ParsedSettings, type SettingsProblem } from '../lib/settings';
+import type { LoaderLists } from '../lib/loaderlists';
+import type { ParsedSettings, SettingsProblem } from '../lib/settings';
 import {
-  BANNERS,
-  COVERS,
-  ICONS,
+  createCompatRootFromFiles,
+  type CompatChangeSummary,
+  type CompatRootState,
+  type FsMode,
+} from '../lib/compatFs';
+import {
+  inspect3dsCardOverview,
+  looksLike3dsSd,
+  type Card3dsInfo,
+} from '../lib/sd3ds';
+import {
   GAMEDATA_FILE,
-  SETTINGS_FILE,
   PICO_DIR,
-  SCREENSHOTS,
   getDir,
-  isAccessError,
-  listEntries,
-  looksLikeDspicoSd,
   pickSdRoot,
   ensureReadWritePermission,
-  readFileBytes,
-  readFileText,
-  scanLibrary,
   writeFileText,
   type LibraryFile,
 } from '../lib/sdcard';
-import { SYSTEMS } from '../lib/systems';
 
 /** Launcher/loader components detected on the card. */
 export interface CardInfo {
@@ -89,6 +86,8 @@ export type SdMessage =
   | { key: 'noPicoAnymore' }
   | { key: 'noPicoPickRoot' }
   | { key: 'noPicoOnCard' }
+  | { key: 'not3dsAnymore' }
+  | { key: 'not3dsPickRoot' }
   | { key: 'fsDenied' }
   | { key: 'fsNotFound' }
   | { key: 'raw'; text: string };
@@ -123,6 +122,18 @@ export interface SdState {
   launcherFilesRead: boolean;
   /** Launcher/loader component info detected on the card. */
   cardInfo: CardInfo;
+  /** 3DS SD card overview detected on open. */
+  card3dsInfo: Card3dsInfo | null;
+  /** Active filesystem mode: direct (Chromium) or compat (Firefox / input fallback). */
+  fsMode: FsMode;
+  /** Pending changes in compat mode (written/deleted paths). */
+  compatChanges: CompatChangeSummary | null;
+  /** Refreshes `compatChanges` after a compat-mode write or delete. */
+  notifyCompatWrite: () => void;
+  /** Opens a local folder / SD card in compat mode from a FileList. */
+  openCompatFiles: (files: Iterable<File>) => Promise<void>;
+  /** Downloads pending compat-mode changes as a `.zip` preserving SD paths. */
+  exportCompatZip: () => Promise<void>;
   /**
    * Parsed loader compatibility lists (`/_pico/aplist.bin`, `savelist.bin`,
    * `patchlist.bin`), or `null` until a card is open. Once open, each per-list
@@ -168,24 +179,6 @@ export interface SdState {
 
 const SdContext = createContext<SdState | null>(null);
 
-/** Lists the files of the three art folders (`COVERS` or `ICONS`), lowercased. */
-async function readArtIndex(
-  root: FileSystemDirectoryHandle,
-  folders: typeof COVERS,
-): Promise<CoverIndex> {
-  const index: CoverIndex = { nds: new Set(), gba: new Set(), user: new Set() };
-  for (const key of ['nds', 'gba', 'user'] as const) {
-    const dir = await getDir(root, folders[key]);
-    if (!dir) continue;
-    for (const entry of await listEntries(dir)) {
-      if (entry.kind === 'file' && !entry.name.startsWith('.')) {
-        index[key].add(entry.name.toLowerCase());
-      }
-    }
-  }
-  return index;
-}
-
 const EMPTY_CARD_INFO: CardInfo = {
   launcherTitle: null,
   launcherModified: null,
@@ -194,122 +187,37 @@ const EMPTY_CARD_INFO: CardInfo = {
   hasScreenshots: false,
 };
 
-async function readCardInfo(root: FileSystemDirectoryHandle): Promise<CardInfo> {
-  const info: CardInfo = { ...EMPTY_CARD_INFO };
-  try {
-    const handle = await root.getFileHandle('_picoboot.nds');
-    const file = await handle.getFile();
-    info.launcherModified = file.lastModified;
-    const bytes = new Uint8Array(await file.arrayBuffer());
-    info.launcherTitle = parseNdsRomTitle(bytes);
-    info.isEnhancedFork = isEnhancedLauncher(bytes);
-  } catch {
-    // no launcher rom at the root: fields stay null
-  }
-  const picoDir = await getDir(root, [PICO_DIR]);
-  if (picoDir) {
-    const loader7 = await readFileBytes(picoDir, 'picoLoader7.bin');
-    if (loader7 !== null) {
-      info.loaderApiVersion = parseLoaderApiVersion(loader7);
-    }
-  }
-  info.hasScreenshots = (await getDir(root, SCREENSHOTS)) !== null;
-  return info;
-}
-
-async function readLauncherFiles(root: FileSystemDirectoryHandle) {
-  const picoDir = await getDir(root, [PICO_DIR]);
-  let gameData: GameData | null = null;
-  let settings: ParsedSettings | null = null;
-  let settingsProblem: SettingsProblem | null = null;
-  const loaderLists: LoaderLists = { ap: null, save: null, patch: null };
-  if (picoDir) {
-    const gameDataText = await readFileText(picoDir, GAMEDATA_FILE);
-    if (gameDataText !== null) {
-      try {
-        gameData = parseGameData(gameDataText);
-      } catch {
-        gameData = null;
-      }
-    }
-    // A settings.json that is there but cannot be used is reported, never taken
-    // for a missing one. An access error is caught like the loader lists below,
-    // so it does not throw away the gamedata.json already read.
-    try {
-      const settingsBytes = await readFileBytes(picoDir, SETTINGS_FILE);
-      if (settingsBytes !== null) {
-        const read = readSettingsBytes(settingsBytes);
-        if ('settings' in read) {
-          settings = read.settings;
-        } else {
-          settingsProblem = read.problem;
-        }
-      }
-    } catch (error) {
-      if (!isAccessError(error)) throw error;
-      const detail = error instanceof Error ? error.message : String(error);
-      settingsProblem = { kind: 'unreadable', detail };
-    }
-    // Loader compatibility lists. An absent file leaves its list null. When a
-    // file is present, the tolerant ap/save parsers always produce an array
-    // (floored to whole entries, mirroring the loader's factories); only the
-    // patchlist parser can still return null, for a structurally broken file.
-    //
-    // Guarded one by one. readFileBytes only swallows a missing entry and rethrows
-    // the rest, so a list that exists but will not open (macOS lock, antivirus, a
-    // failing card) would throw out of this function and discard the gamedata.json
-    // and settings.json already parsed above - taking every heart, completed mark
-    // and play badge with it, over a file that only feeds the compat sheet. A null
-    // list is exactly the "cannot tell" that sheet already knows how to report.
-    try {
-      const apBytes = await readFileBytes(picoDir, 'aplist.bin');
-      if (apBytes !== null) loaderLists.ap = parseApList(apBytes);
-    } catch (error) {
-      if (!isAccessError(error)) throw error;
-    }
-    try {
-      const saveBytes = await readFileBytes(picoDir, 'savelist.bin');
-      if (saveBytes !== null) loaderLists.save = parseSaveList(saveBytes);
-    } catch (error) {
-      if (!isAccessError(error)) throw error;
-    }
-    try {
-      const patchBytes = await readFileBytes(picoDir, 'patchlist.bin');
-      if (patchBytes !== null) loaderLists.patch = parsePatchList(patchBytes);
-    } catch (error) {
-      if (!isAccessError(error)) throw error;
-    }
-  }
-  return { gameData, settings, settingsProblem, loaderLists };
-}
-
 export function SdProvider({ children }: { children: ReactNode }) {
   const [root, setRoot] = useState<FileSystemDirectoryHandle | null>(null);
   const [loading, setLoading] = useState(false);
   const [progress, setProgress] = useState<SdMessage | null>(null);
   const [error, setError] = useState<SdMessage | null>(null);
-  const [games, setGames] = useState<LibraryFile[]>([]);
-  const [coverIndex, setCoverIndex] = useState<CoverIndex>({
+  const [games] = useState<LibraryFile[]>([]);
+  const [coverIndex] = useState<CoverIndex>({
     nds: new Set(),
     gba: new Set(),
     user: new Set(),
   });
-  const [iconIndex, setIconIndex] = useState<CoverIndex>({
+  const [iconIndex] = useState<CoverIndex>({
     nds: new Set(),
     gba: new Set(),
     user: new Set(),
   });
-  const [bannerIndex, setBannerIndex] = useState<CoverIndex>({
+  const [bannerIndex] = useState<CoverIndex>({
     nds: new Set(),
     gba: new Set(),
     user: new Set(),
   });
   const [gameData, setGameData] = useState<GameData | null>(null);
-  const [settings, setSettings] = useState<ParsedSettings | null>(null);
-  const [settingsProblem, setSettingsProblem] = useState<SettingsProblem | null>(null);
+  const [settings] = useState<ParsedSettings | null>(null);
+  const [settingsProblem] = useState<SettingsProblem | null>(null);
   const [launcherFilesRead, setLauncherFilesRead] = useState(false);
-  const [cardInfo, setCardInfo] = useState<CardInfo>(EMPTY_CARD_INFO);
-  const [loaderLists, setLoaderLists] = useState<LoaderLists | null>(null);
+  const [cardInfo] = useState<CardInfo>(EMPTY_CARD_INFO);
+  const [card3dsInfo, setCard3dsInfo] = useState<Card3dsInfo | null>(null);
+  const [fsMode, setFsMode] = useState<FsMode>('direct');
+  const compatStateRef = useRef<CompatRootState | null>(null);
+  const [compatChanges, setCompatChanges] = useState<CompatChangeSummary | null>(null);
+  const [loaderLists] = useState<LoaderLists | null>(null);
   /**
    * Mirror of `gameData` for the write queue: a queued toggle must build on
    * the data of the toggle that just finished, not on the (possibly stale)
@@ -320,29 +228,10 @@ export function SdProvider({ children }: { children: ReactNode }) {
   const writeChain = useRef<Promise<void>>(Promise.resolve());
 
   const loadFrom = useCallback(async (rootHandle: FileSystemDirectoryHandle) => {
-    // in-flight favorite writes must commit before re-reading gamedata.json,
-    // or the reload could revert them with a pre-toggle snapshot
     await writeChain.current;
-    setProgress({ key: 'scanningLibrary' });
-    setGames(
-      await scanLibrary(rootHandle, SYSTEMS, (filesSeen) => {
-        // large collections take a while: show the walk is alive
-        setProgress({ key: 'scanningLibraryCount', count: filesSeen });
-      }),
-    );
-    setProgress({ key: 'readingCovers' });
-    setCoverIndex(await readArtIndex(rootHandle, COVERS));
-    setIconIndex(await readArtIndex(rootHandle, ICONS));
-    setBannerIndex(await readArtIndex(rootHandle, BANNERS));
     setProgress({ key: 'readingLauncherData' });
-    const launcher = await readLauncherFiles(rootHandle);
-    gameDataRef.current = launcher.gameData;
-    setGameData(launcher.gameData);
-    setSettings(launcher.settings);
-    setSettingsProblem(launcher.settingsProblem);
+    setCard3dsInfo(await inspect3dsCardOverview(rootHandle));
     setLauncherFilesRead(true);
-    setLoaderLists(launcher.loaderLists);
-    setCardInfo(await readCardInfo(rootHandle));
     setProgress(null);
   }, []);
 
@@ -390,12 +279,15 @@ export function SdProvider({ children }: { children: ReactNode }) {
         setError({ key: 'needsAccess', name: lastCardHandle.name });
         return false;
       }
-      if (!(await looksLikeDspicoSd(lastCardHandle))) {
-        // the folder is still there but is not a card any more
-        setError({ key: 'noPicoAnymore' });
+      if (!(await looksLike3dsSd(lastCardHandle))) {
+        // the folder is still there but is not a 3DS card any more
+        setError({ key: 'not3dsAnymore' });
         dismissLastCard();
         return false;
       }
+      compatStateRef.current = null;
+      setCompatChanges(null);
+      setFsMode('direct');
       setRoot(lastCardHandle);
       setLastCard(null);
       await loadFrom(lastCardHandle);
@@ -417,10 +309,13 @@ export function SdProvider({ children }: { children: ReactNode }) {
     setLoading(true);
     try {
       const rootHandle = await pickSdRoot();
-      if (!(await looksLikeDspicoSd(rootHandle))) {
-        setError({ key: 'noPicoPickRoot' });
+      if (!(await looksLike3dsSd(rootHandle))) {
+        setError({ key: 'not3dsPickRoot' });
         return;
       }
+      compatStateRef.current = null;
+      setCompatChanges(null);
+      setFsMode('direct');
       setRoot(rootHandle);
       setLastCard(null);
       void rememberCard(rootHandle);
@@ -435,6 +330,50 @@ export function SdProvider({ children }: { children: ReactNode }) {
       setProgress(null);
     }
   }, [loadFrom]);
+
+  const notifyCompatWrite = useCallback(() => {
+    if (compatStateRef.current) {
+      setCompatChanges(compatStateRef.current.getChanges());
+    }
+  }, []);
+
+  const openCompatFiles = useCallback(
+    async (files: Iterable<File>) => {
+      setError(null);
+      setLoading(true);
+      try {
+        const compat = createCompatRootFromFiles(files);
+        if (!(await looksLike3dsSd(compat.handle))) {
+          setError({ key: 'not3dsPickRoot' });
+          return;
+        }
+        compatStateRef.current = compat;
+        setCompatChanges(compat.getChanges());
+        setFsMode('compat');
+        setRoot(compat.handle);
+        setLastCard(null);
+        await loadFrom(compat.handle);
+      } catch (e) {
+        setError(fsMessage(e));
+      } finally {
+        setLoading(false);
+        setProgress(null);
+      }
+    },
+    [loadFrom],
+  );
+
+  const exportCompatZip = useCallback(async () => {
+    if (!compatStateRef.current) return;
+    const bytes = await compatStateRef.current.exportZip();
+    const blob = new Blob([bytes], { type: 'application/zip' });
+    const url = URL.createObjectURL(blob);
+    const a = document.createElement('a');
+    a.href = url;
+    a.download = `3dsdex-${compatStateRef.current.rootName}.zip`;
+    a.click();
+    URL.revokeObjectURL(url);
+  }, []);
 
   /**
    * Tail of the rescan queue. Two rescans running at once would interleave
@@ -538,6 +477,12 @@ export function SdProvider({ children }: { children: ReactNode }) {
       settingsProblem,
       launcherFilesRead,
       cardInfo,
+      card3dsInfo,
+      fsMode,
+      compatChanges,
+      notifyCompatWrite,
+      openCompatFiles,
+      exportCompatZip,
       loaderLists,
       openSd,
       lastCard,
@@ -562,6 +507,12 @@ export function SdProvider({ children }: { children: ReactNode }) {
       settingsProblem,
       launcherFilesRead,
       cardInfo,
+      card3dsInfo,
+      fsMode,
+      compatChanges,
+      notifyCompatWrite,
+      openCompatFiles,
+      exportCompatZip,
       loaderLists,
       openSd,
       lastCard,

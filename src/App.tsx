@@ -1,4 +1,4 @@
-import { useRef, useState, type ComponentType } from 'react';
+import { useRef, useState, type ChangeEvent, type ComponentType } from 'react';
 import { ProgressBar } from './components/ProgressBar';
 import { isFileSystemAccessSupported } from './lib/sdcard';
 import { SdProvider, useSd } from './state/SdContext';
@@ -6,13 +6,8 @@ import { useTheme } from './state/theme';
 import { LANGUAGES, LanguageProvider, useLang, useT, type Lang } from './i18n';
 import { resolveSdMessage } from './i18n/messages';
 import type { Dict } from './i18n/en';
-import { LibraryView } from './views/LibraryView';
-import { CoversView } from './views/CoversView';
-import { StatsView } from './views/StatsView';
-import { AssociationsView } from './views/AssociationsView';
-import { ScreenshotsView } from './views/ScreenshotsView';
-import { HealthView } from './views/HealthView';
-import { DropImport } from './components/DropImport';
+import { CfwOverviewView } from './views/CfwOverviewView';
+import { Health3dsView } from './views/Health3dsView';
 import { Changelog } from './components/Changelog';
 import { RepoCard } from './components/RepoCard';
 import {
@@ -21,7 +16,6 @@ import {
   IconGrid,
   IconImage,
   IconLink,
-  IconScreens,
   IconPulse,
   IconThemeDark,
   IconThemeLight,
@@ -31,17 +25,13 @@ import {
 import { nextThemePick, type ThemePick } from './lib/theme';
 import './App.css';
 
-type Tab = 'library' | 'covers' | 'stats' | 'associations' | 'screenshots' | 'health';
+type Tab = 'health' | 'cfw';
 
 type IconComponent = ComponentType<{ className?: string }>;
 
 const TABS: { id: Tab; label: (t: Dict) => string; Icon: IconComponent }[] = [
-  { id: 'library', label: (t) => t.app.tabs.library, Icon: IconGrid },
-  { id: 'covers', label: (t) => t.app.tabs.covers, Icon: IconImage },
-  { id: 'stats', label: (t) => t.app.tabs.stats, Icon: IconChart },
-  { id: 'associations', label: (t) => t.app.tabs.associations, Icon: IconLink },
-  { id: 'screenshots', label: (t) => t.app.tabs.screenshots, Icon: IconScreens },
   { id: 'health', label: (t) => t.app.tabs.health, Icon: IconPulse },
+  { id: 'cfw', label: (t) => t.app.tabs.library, Icon: IconGrid },
 ];
 
 const FEATURES: {
@@ -99,7 +89,7 @@ function Cartridge() {
 function BrandName() {
   return (
     <span>
-      Pico<span className="app__brand-accent">Dex</span>
+      3DS<span className="app__brand-accent">dex</span>
     </span>
   );
 }
@@ -113,18 +103,36 @@ function Wordmark() {
   );
 }
 
-/** Landing hero shown before an SD card is opened. */
+/** Landing hero shown before an SD card or local folder is opened. */
 function Welcome({ onWhatsNew }: { onWhatsNew: () => void }) {
-  const { openSd, lastCard, openLastCard, dismissLastCard, loading, progress, error } = useSd();
+  const {
+    openSd,
+    openCompatFiles,
+    lastCard,
+    openLastCard,
+    dismissLastCard,
+    loading,
+    progress,
+    error,
+  } = useSd();
   const t = useT();
   const supported = isFileSystemAccessSupported();
   const pickButton = useRef<HTMLButtonElement>(null);
-  // Dismissing removes the button that was just clicked, so send focus to the
-  // one that replaces it instead of dropping it back to the document.
+  const compatInputRef = useRef<HTMLInputElement>(null);
+
   const handleDismiss = () => {
     dismissLastCard();
     requestAnimationFrame(() => pickButton.current?.focus());
   };
+
+  const handleCompatChange = (e: ChangeEvent<HTMLInputElement>) => {
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      void openCompatFiles(files);
+    }
+    e.target.value = '';
+  };
+
   return (
     <div className="app__welcome">
       <h1 className="app__welcome-title">
@@ -132,6 +140,15 @@ function Welcome({ onWhatsNew }: { onWhatsNew: () => void }) {
         <BrandName />
       </h1>
       <p className="app__tagline">{t.welcome.tagline}</p>
+      <input
+        ref={compatInputRef}
+        type="file"
+        multiple
+        // @ts-expect-error webkitdirectory is supported in Firefox, Chrome, Safari, Edge
+        webkitdirectory=""
+        style={{ display: 'none' }}
+        onChange={handleCompatChange}
+      />
       {supported && lastCard != null && (
         <div className="app__last-card">
           <button
@@ -150,16 +167,35 @@ function Welcome({ onWhatsNew }: { onWhatsNew: () => void }) {
         </div>
       )}
       {!supported ? (
-        <p className="app__unsupported">{t.welcome.unsupported}</p>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+          <button
+            className="primary app__cta"
+            onClick={() => compatInputRef.current?.click()}
+            disabled={loading}
+          >
+            {loading ? t.welcome.opening : t.welcome.openSd}
+          </button>
+          <p className="app__unsupported">{t.welcome.unsupported}</p>
+        </div>
       ) : lastCard === null ? (
-        <button
-          ref={pickButton}
-          className="primary app__cta"
-          onClick={() => void openSd()}
-          disabled={loading}
-        >
-          {loading ? t.welcome.opening : t.welcome.openSd}
-        </button>
+        <div style={{ display: 'flex', flexDirection: 'column', alignItems: 'center', gap: '0.6rem' }}>
+          <button
+            ref={pickButton}
+            className="primary app__cta"
+            onClick={() => void openSd()}
+            disabled={loading}
+          >
+            {loading ? t.welcome.opening : t.welcome.openSd}
+          </button>
+          <button
+            type="button"
+            className="app__last-card-forget"
+            onClick={() => compatInputRef.current?.click()}
+            disabled={loading}
+          >
+            {t.dex3ds.compatOpenBtn}
+          </button>
+        </div>
       ) : null}
       {loading && (
         <span className="app__loading" role="status">
@@ -186,33 +222,21 @@ function Welcome({ onWhatsNew }: { onWhatsNew: () => void }) {
   );
 }
 
-/** Tabbed workspace shown once an SD card is open. */
+/** Tabbed workspace shown once an SD card or local folder is open. */
 function Workspace() {
-  const { root, error, refresh, loading, progress, cardInfo, gameData } = useSd();
+  const { root, error, refresh, loading, progress, fsMode, compatChanges, exportCompatZip } =
+    useSd();
   const t = useT();
-  const [tab, setTab] = useState<Tab>('library');
-  // The card is running the Enhanced fork if its launcher banner says so, or if
-  // it has written a gamedata.json (favorites/play time, which stock never does).
-  // Either signal counts, so a fork install from before the banner marker keeps
-  // its tab, while a stock Pico Launcher on any flashcart has neither and stays
-  // generic.
-  const runsEnhancedFork = cardInfo.isEnhancedFork || gameData !== null;
-  // the stats tab needs the fork's gamedata.json. The gallery shows on any fork
-  // card, even before the first capture: the folder only appears once someone
-  // has held START, and a tab that explains the shortcut beats a hidden one. A
-  // card left with the folder from an older install keeps it too.
-  const tabs = TABS.filter(
-    (tabDef) =>
-      (tabDef.id !== 'stats' || runsEnhancedFork) &&
-      (tabDef.id !== 'screenshots' || cardInfo.hasScreenshots || runsEnhancedFork),
-  );
-  // If the active tab is no longer available (switched to a stock card while on
-  // the Pico Enhanced tab), fall back to the library rather than show a phantom.
-  const activeTab = tabs.some((tabDef) => tabDef.id === tab) ? tab : 'library';
+  const [tab, setTab] = useState<Tab>('health');
+  const activeTab = TABS.some((tabDef) => tabDef.id === tab) ? tab : 'health';
+  const pendingCount = compatChanges
+    ? compatChanges.written.length + compatChanges.deleted.length
+    : 0;
+
   return (
     <>
       <nav className="app__tabs" aria-label={t.app.sections}>
-        {tabs.map(({ id, label, Icon }) => (
+        {TABS.map(({ id, label, Icon }) => (
           <button
             key={id}
             className={activeTab === id ? 'app__tab app__tab--active' : 'app__tab'}
@@ -227,10 +251,42 @@ function Workspace() {
           <span className="app__sd-dot" aria-hidden="true" />
           {root?.name}
         </span>
-        <button className="app__reload" onClick={() => void refresh()} disabled={loading}>
-          {loading ? t.app.reloading : t.app.reload}
-        </button>
+        {fsMode === 'direct' && (
+          <button className="app__reload" onClick={() => void refresh()} disabled={loading}>
+            {loading ? t.app.reloading : t.app.reload}
+          </button>
+        )}
       </nav>
+      {fsMode === 'compat' && (
+        <div
+          className="card"
+          style={{
+            display: 'flex',
+            alignItems: 'center',
+            justifyContent: 'space-between',
+            gap: '0.75rem',
+            flexWrap: 'wrap',
+            marginBottom: '1rem',
+          }}
+        >
+          <div style={{ display: 'flex', flexDirection: 'column', gap: '0.2rem' }}>
+            <span style={{ fontSize: '0.9rem' }}>{t.dex3ds.compatBanner}</span>
+            {compatChanges && (
+              <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
+                {t.dex3ds.compatPending(compatChanges.written.length, compatChanges.deleted.length)}
+              </span>
+            )}
+          </div>
+          <button
+            type="button"
+            className="primary"
+            disabled={pendingCount === 0}
+            onClick={() => void exportCompatZip()}
+          >
+            {t.dex3ds.compatExportBtn(pendingCount)}
+          </button>
+        </div>
+      )}
       {loading && (
         <span className="app__loading" role="status">
           <ProgressBar />
@@ -241,14 +297,9 @@ function Workspace() {
       )}
       {error && <p className="app__error">{resolveSdMessage(t, error)}</p>}
       <main className="app__content">
-        {activeTab === 'library' && <LibraryView />}
-        {activeTab === 'covers' && <CoversView />}
-        {activeTab === 'stats' && <StatsView />}
-        {activeTab === 'associations' && <AssociationsView />}
-        {activeTab === 'screenshots' && <ScreenshotsView />}
-        {activeTab === 'health' && <HealthView />}
+        {activeTab === 'health' && <Health3dsView />}
+        {activeTab === 'cfw' && <CfwOverviewView />}
       </main>
-      <DropImport />
     </>
   );
 }

@@ -1,0 +1,140 @@
+.health3ds {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem;
+}
+
+.health3ds__header {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 1rem;
+  flex-wrap: wrap;
+}
+
+.health3ds__title {
+  margin: 0;
+  font-size: 1.4rem;
+}
+
+.health3ds__intro {
+  margin: 0.25rem 0 0;
+  color: var(--text-dim);
+  font-size: 0.9rem;
+}
+
+.health3ds__protected {
+  margin: 0;
+  font-size: 0.82rem;
+  color: var(--text-dim);
+  padding: 0.5rem 0.75rem;
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+}
+
+.health3ds__notice {
+  margin: 0;
+  padding: 0.6rem 0.85rem;
+  border-radius: var(--radius);
+  background: var(--ok-soft);
+  color: var(--ok);
+  font-size: 0.9rem;
+}
+
+.health3ds__grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 1rem;
+}
+
+.health3ds__section {
+  background: var(--bg-raised);
+  border: 1px solid var(--border);
+  border-radius: var(--radius);
+  padding: 1rem;
+  box-shadow: var(--shadow-card);
+  display: flex;
+  flex-direction: column;
+  gap: 0.65rem;
+}
+
+.health3ds__section--ok {
+  border-left: 3px solid var(--ok);
+}
+
+.health3ds__section--warn {
+  border-left: 3px solid var(--warn);
+}
+
+.health3ds__list {
+  margin: 0;
+  padding-left: 1rem;
+  display: flex;
+  flex-direction: column;
+  gap: 0.35rem;
+  font-size: 0.9rem;
+}
+
+.health3ds__ok {
+  color: var(--ok);
+  margin: 0;
+}
+
+.health3ds__warn {
+  color: var(--warn);
+  margin: 0;
+}
+
+.health3ds__dim {
+  color: var(--text-dim);
+  margin: 0;
+}
+
+.health3ds__body {
+  margin: 0;
+  font-size: 0.9rem;
+  color: var(--text);
+}
+
+.health3ds__item {
+  font-size: 0.85rem;
+  word-break: break-word;
+}
+
+.health3ds__ext-link {
+  align-self: flex-start;
+  font-weight: 600;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.health3ds__ext-link:hover {
+  text-decoration: underline;
+}
+
+.health3ds__danger {
+  align-self: flex-start;
+  background: transparent;
+  border: 1px solid var(--accent);
+  color: var(--accent-text);
+}
+
+.health3ds__danger:hover:not(:disabled) {
+  background: var(--accent-fill);
+  color: var(--on-accent);
+}
+
+.health3ds__confirm {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+  flex-wrap: wrap;
+  font-size: 0.85rem;
+}
+
+.health3ds__empty {
+  color: var(--text-dim);
+  padding: 2rem 1rem;
+  text-align: center;
+}
