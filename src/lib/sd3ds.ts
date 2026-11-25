@@ -3,7 +3,17 @@
  * aligned with https://3ds.hacks.guide/ and real-world Old 3DS XL CFW cards.
  */
 
+import { DIR_BOOT9STRAP, DIR_NINTENDO_3DS } from './criticalPaths.ts';
 import { getDir, fileExists, listEntries } from './sdcard.ts';
+
+export {
+  assertNotCriticalPath,
+  formatSdPath,
+  isCriticalSystemPath,
+  CRITICAL_SYSTEM_PATHS,
+  DIR_BOOT9STRAP,
+  DIR_NINTENDO_3DS,
+} from './criticalPaths.ts';
 
 /** Critical CFW / Homebrew files at the SD card root. */
 export const CRITICAL_ROOT_FILES = ['boot.firm', 'boot.3dsx'] as const;
@@ -17,8 +27,6 @@ export const DIR_3DS = '3ds';
 export const DIR_CIAS = 'cias';
 export const DIR_GM9 = 'gm9';
 export const DIR_GM9_OUT = ['gm9', 'out'] as const;
-export const DIR_NINTENDO_3DS = 'Nintendo 3DS';
-export const DIR_BOOT9STRAP = 'boot9strap';
 export const DIR_FBI = 'fbi';
 export const DIR_NSA = 'nsa';
 

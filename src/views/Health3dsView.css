@@ -138,3 +138,93 @@
   padding: 2rem 1rem;
   text-align: center;
 }
+
+/* Compact, collapsible /3ds/ report: counters first, details on demand. */
+.health3ds__badges {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.35rem;
+}
+
+.health3ds__badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.3rem;
+  padding: 0.15rem 0.5rem;
+  border-radius: 999px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-dim);
+  font-size: 0.75rem;
+  white-space: nowrap;
+}
+
+.health3ds__badge--ok {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.health3ds__badge--warn {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+.health3ds__groups {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.health3ds__group {
+  border-top: 1px solid var(--border);
+  padding: 0.35rem 0;
+}
+
+.health3ds__groupSummary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.5rem;
+  cursor: pointer;
+  font-size: 0.85rem;
+  color: var(--warn);
+  list-style: none;
+}
+
+.health3ds__groupSummary::-webkit-details-marker {
+  display: none;
+}
+
+.health3ds__groupSummary::before {
+  content: '▸';
+  color: var(--text-dim);
+}
+
+.health3ds__group[open] .health3ds__groupSummary::before {
+  content: '▾';
+}
+
+.health3ds__appItem {
+  padding-left: 0.25rem;
+}
+
+.health3ds__check {
+  display: flex;
+  align-items: center;
+  gap: 0.45rem;
+}
+
+.health3ds__linkButton {
+  align-self: flex-start;
+  margin-top: 0.3rem;
+  padding: 0;
+  background: none;
+  border: 0;
+  color: var(--accent-text);
+  font-size: 0.8rem;
+  text-decoration: underline;
+}
+
+.health3ds__linkButton:hover {
+  color: var(--text);
+}

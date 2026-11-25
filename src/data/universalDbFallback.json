@@ -1,0 +1,118 @@
+[
+  {
+    "title": "Universal-Updater",
+    "author": "Universal-Team",
+    "description": "An easy to use app for installing and updating 3DS homebrew.",
+    "version": "v3.2.6",
+    "categories": ["utility"],
+    "systems": ["3DS"],
+    "github": "Universal-Team/Universal-Updater",
+    "downloads": {
+      "Universal-Updater.3dsx": {
+        "url": "https://github.com/Universal-Team/Universal-Updater/releases/latest/download/Universal-Updater.3dsx"
+      },
+      "Universal-Updater.cia": {
+        "url": "https://github.com/Universal-Team/Universal-Updater/releases/latest/download/Universal-Updater.cia"
+      }
+    }
+  },
+  {
+    "title": "NSA",
+    "author": "tinaut1986",
+    "description": "Modern fork of FBI with 3DS-to-3DS transfers, Universal-DB integration, and built-in updater.",
+    "version": "v1.4.0",
+    "categories": ["utility"],
+    "systems": ["3DS"],
+    "github": "tinaut1986/NSA",
+    "downloads": {
+      "NSA.cia": {
+        "url": "https://github.com/tinaut1986/NSA/releases/latest/download/NSA.cia"
+      },
+      "NSA.3dsx": {
+        "url": "https://github.com/tinaut1986/NSA/releases/latest/download/NSA.3dsx"
+      }
+    }
+  },
+  {
+    "title": "Anemone3DS",
+    "author": "astronautlevel2",
+    "description": "Theme, splash, and badge manager for Nintendo 3DS.",
+    "version": "v3.0.1",
+    "categories": ["utility"],
+    "systems": ["3DS"],
+    "github": "astronautlevel2/Anemone3DS",
+    "downloads": {
+      "Anemone3DS.3dsx": {
+        "url": "https://github.com/astronautlevel2/Anemone3DS/releases/latest/download/Anemone3DS.3dsx"
+      },
+      "Anemone3DS.cia": {
+        "url": "https://github.com/astronautlevel2/Anemone3DS/releases/latest/download/Anemone3DS.cia"
+      }
+    }
+  },
+  {
+    "title": "Checkpoint",
+    "author": "BernardoGiordano",
+    "description": "Fast and simple homebrew save manager for 3DS and DS.",
+    "version": "v3.8.0",
+    "categories": ["save-manager", "utility"],
+    "systems": ["3DS"],
+    "github": "BernardoGiordano/Checkpoint",
+    "downloads": {
+      "Checkpoint.3dsx": {
+        "url": "https://github.com/BernardoGiordano/Checkpoint/releases/latest/download/Checkpoint.3dsx"
+      },
+      "Checkpoint.cia": {
+        "url": "https://github.com/BernardoGiordano/Checkpoint/releases/latest/download/Checkpoint.cia"
+      }
+    }
+  },
+  {
+    "title": "ftpd",
+    "author": "mtheall",
+    "description": "FTP server for 3DS to transfer files wirelessly.",
+    "version": "v3.2.1",
+    "categories": ["utility"],
+    "systems": ["3DS"],
+    "github": "mtheall/ftpd",
+    "downloads": {
+      "ftpd.3dsx": {
+        "url": "https://github.com/mtheall/ftpd/releases/latest/download/ftpd.3dsx"
+      },
+      "ftpd.cia": {
+        "url": "https://github.com/mtheall/ftpd/releases/latest/download/ftpd.cia"
+      }
+    }
+  },
+  {
+    "title": "TWiLight Menu++",
+    "author": "DS-Homebrew",
+    "description": "Open-source DSi Menu upgrade/replacement for 3DS, DSi, and flashcards.",
+    "version": "v27.14.0",
+    "categories": ["emulator", "utility"],
+    "systems": ["3DS", "DS"],
+    "github": "DS-Homebrew/TWiLightMenu",
+    "downloads": {
+      "TWiLightMenu-3DS.7z": {
+        "url": "https://github.com/DS-Homebrew/TWiLightMenu/releases/latest/download/TWiLightMenu-3DS.7z"
+      }
+    }
+  },
+  {
+    "title": "Nimbus",
+    "author": "PretendoNetwork",
+    "description": "Account switcher for Pretendo Network and Nintendo Network.",
+    "version": "v2.0.1",
+    "categories": ["utility"],
+    "systems": ["3DS"],
+    "github": "PretendoNetwork/nimbus",
+    "downloads": {
+      "nimbus.3dsx": {
+        "url": "https://github.com/PretendoNetwork/nimbus/releases/latest/download/nimbus.3dsx"
+      },
+      "nimbus.cia": {
+        "url": "https://github.com/PretendoNetwork/nimbus/releases/latest/download/nimbus.cia"
+      }
+    }
+  }
+]

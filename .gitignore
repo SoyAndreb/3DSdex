@@ -7,18 +7,25 @@ yarn-error.log*
 pnpm-debug.log*
 lerna-debug.log*
 
-node_modules
-dist
-dist-ssr
+# Dependencies & build output
+node_modules/
+dist/
+dist-ssr/
 *.local
+
+# Local 3DS reference folder (do not commit personal/test SD dumps)
+REFERENCIA ARCHIVOS COMUNES 3DS/
 
 # Editor directories and files
 .vscode/*
 !.vscode/extensions.json
 .idea
-.DS_Store
 *.suo
 *.ntvs*
 *.njsproj
 *.sln
 *.sw?
+
+# OS junk files
+.DS_Store
+Thumbs.db

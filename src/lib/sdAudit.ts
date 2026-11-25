@@ -15,10 +15,12 @@ import {
   isJunkFileName,
   isPreventionOnlyFsevents,
 } from './health.ts';
+import { isCriticalSystemPath } from './criticalPaths.ts';
 import {
   DIR_3DS,
   DIR_CIAS,
   DIR_FBI,
+  DIR_LUMA_PAYLOADS,
   DIR_NSA,
   PROTECTED_ROOT_DIRS,
 } from './sd3ds.ts';
@@ -76,14 +78,25 @@ export function evaluateFbiNsaRule(input: {
 export interface MisplacedFile {
   name: string;
   size: number;
-  kind: 'cia' | '3dsx';
+  kind: 'cia' | '3dsx' | 'firm';
+  suggestedSegments: readonly string[];
   suggestedDir: string;
+}
+
+export interface LeftoverItem {
+  id: string;
+  path: readonly string[];
+  name: string;
+  size: number;
+  reason: 'bak' | 'log' | 'cia-installer';
 }
 
 export interface Audit3dsResult {
   junkFiles: JunkFile[];
   junkDirs: JunkDir[];
+  emptyLostDir: boolean;
   misplacedFiles: MisplacedFile[];
+  leftovers: LeftoverItem[];
   hasBootFirm: boolean;
   hasBoot3dsx: boolean;
   hasGodMode9: boolean;
@@ -119,9 +132,11 @@ export async function audit3dsCard(
   const junkFiles: JunkFile[] = [];
   const junkDirs: JunkDir[] = [];
   const misplacedFiles: MisplacedFile[] = [];
+  const leftovers: LeftoverItem[] = [];
   const skippedDirs: string[] = [];
 
   let filesSeen = 0;
+  let emptyLostDir = false;
   let hasBootFirm = false;
   let hasBoot3dsx = false;
   let hasGodMode9 = false;
@@ -129,9 +144,22 @@ export async function audit3dsCard(
   let hasFbiDir = false;
   let hasNsaDir = false;
 
+  const LOG_NAMES = new Set(['lumaupdater.log', 'bootex.log', 'errdisp.txt']);
+
+  async function safeFileSize(handle: FileSystemFileHandle): Promise<number> {
+    try {
+      return (await handle.getFile()).size;
+    } catch {
+      return 0;
+    }
+  }
+
   async function walk(dir: FileSystemDirectoryHandle, path: readonly string[]): Promise<void> {
+    // Critical system folders are never walked, even when reached indirectly.
+    if (isCriticalSystemPath(path)) return;
     const isRoot = path.length === 0;
     const inLuma = path.length === 1 && path[0].toLowerCase() === 'luma';
+    const inCias = path.length === 1 && path[0].toLowerCase() === DIR_CIAS.toLowerCase();
     const inPayloads =
       path.length === 2 &&
       path[0].toLowerCase() === 'luma' &&
@@ -146,12 +174,7 @@ export async function audit3dsCard(
         }
 
         if (isJunkFileName(handle.name)) {
-          let size = 0;
-          try {
-            size = (await handle.getFile()).size;
-          } catch {
-            // size is display-only
-          }
+          const size = await safeFileSize(handle);
           junkFiles.push({ path, name: handle.name, size });
           continue;
         }
@@ -160,37 +183,67 @@ export async function audit3dsCard(
         if (isRoot) {
           if (lower === 'boot.firm') hasBootFirm = true;
           else if (lower === 'boot.3dsx') hasBoot3dsx = true;
-          else if (lower.endsWith('.cia')) {
-            let size = 0;
-            try {
-              size = (await handle.getFile()).size;
-            } catch {
-              // display-only
-            }
+          else if (lower === 'boot.firm.bak') {
+            leftovers.push({
+              id: `/${handle.name}`,
+              path,
+              name: handle.name,
+              size: await safeFileSize(handle),
+              reason: 'bak',
+            });
+          } else if (LOG_NAMES.has(lower)) {
+            leftovers.push({
+              id: `/${handle.name}`,
+              path,
+              name: handle.name,
+              size: await safeFileSize(handle),
+              reason: 'log',
+            });
+          } else if (lower.endsWith('.cia')) {
             misplacedFiles.push({
               name: handle.name,
-              size,
+              size: await safeFileSize(handle),
               kind: 'cia',
+              suggestedSegments: [DIR_CIAS],
               suggestedDir: DIR_CIAS,
             });
           } else if (lower.endsWith('.3dsx')) {
-            let size = 0;
-            try {
-              size = (await handle.getFile()).size;
-            } catch {
-              // display-only
-            }
             misplacedFiles.push({
               name: handle.name,
-              size,
+              size: await safeFileSize(handle),
               kind: '3dsx',
+              suggestedSegments: [DIR_3DS],
               suggestedDir: DIR_3DS,
+            });
+          } else if (lower.endsWith('.firm')) {
+            misplacedFiles.push({
+              name: handle.name,
+              size: await safeFileSize(handle),
+              kind: 'firm',
+              suggestedSegments: DIR_LUMA_PAYLOADS,
+              suggestedDir: DIR_LUMA_PAYLOADS.join('/'),
             });
           }
         } else if (inLuma && lower === 'config.ini') {
           hasLumaConfig = true;
+        } else if (inLuma && LOG_NAMES.has(lower)) {
+          leftovers.push({
+            id: `/luma/${handle.name}`,
+            path,
+            name: handle.name,
+            size: await safeFileSize(handle),
+            reason: 'log',
+          });
         } else if (inPayloads && lower.includes('godmode9') && lower.endsWith('.firm')) {
           hasGodMode9 = true;
+        } else if (inCias && lower.endsWith('.cia')) {
+          leftovers.push({
+            id: `/cias/${handle.name}`,
+            path,
+            name: handle.name,
+            size: await safeFileSize(handle),
+            reason: 'cia-installer',
+          });
         }
         continue;
       }
@@ -208,6 +261,15 @@ export async function audit3dsCard(
       }
 
       if (isRoot) {
+        if (lowerDir === 'lost.dir') {
+          try {
+            const entries = await listEntries(handle);
+            if (entries.length === 0) emptyLostDir = true;
+          } catch {
+            // ignore
+          }
+          continue;
+        }
         if (lowerDir === DIR_FBI) hasFbiDir = true;
         if (lowerDir === DIR_NSA) hasNsaDir = true;
         if (isProtectedRootDir(handle.name)) {
@@ -223,6 +285,7 @@ export async function audit3dsCard(
       }
 
       if (path.length < MAX_SCAN_DEPTH) {
+        if (isCriticalSystemPath([...path, handle.name])) continue;
         try {
           await walk(handle, [...path, handle.name]);
         } catch (error) {
@@ -241,7 +304,9 @@ export async function audit3dsCard(
   return {
     junkFiles,
     junkDirs,
+    emptyLostDir,
     misplacedFiles,
+    leftovers,
     hasBootFirm,
     hasBoot3dsx,
     hasGodMode9,

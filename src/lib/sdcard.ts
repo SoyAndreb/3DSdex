@@ -17,6 +17,7 @@
  * flow through untouched; tests exercise them with in-memory fakes.
  */
 
+import { assertNotCriticalPath, isCriticalSystemPath } from './criticalPaths.ts';
 import type { System } from './systems.ts';
 
 /**
@@ -173,6 +174,8 @@ export async function getDir(
   path: readonly string[],
   create = false,
 ): Promise<FileSystemDirectoryHandle | null> {
+  // Reading a critical folder is allowed; creating anything inside one is not.
+  if (create) assertNotCriticalPath(path);
   let dir = root;
   for (const segment of path) {
     try {
@@ -273,6 +276,26 @@ export async function writeFileText(
   text: string,
 ): Promise<void> {
   await writeFileBytes(dir, name, new TextEncoder().encode(text));
+}
+
+/**
+ * Removes an entry by its full SD-relative path. Centralizes the critical-path
+ * check so no cleanup flow can delete inside `/Nintendo 3DS/` or
+ * `/boot9strap/`, in direct mode or through the compat overlay.
+ */
+export async function removeFromPath(
+  root: FileSystemDirectoryHandle,
+  path: readonly string[],
+  name: string,
+  options?: FileSystemRemoveOptions,
+): Promise<void> {
+  const fullPath = [...path, name];
+  assertNotCriticalPath(fullPath);
+  const dir = await getDir(root, path);
+  if (dir === null) {
+    throw new DOMException(`Directory not found: /${path.join('/')}`, 'NotFoundError');
+  }
+  await dir.removeEntry(name, options);
 }
 
 /** One directory entry as returned by {@link listEntries}. */
@@ -392,6 +415,7 @@ export async function scanLibrary(
         continue;
       }
       if (handle.kind === 'directory') {
+        if (isCriticalSystemPath([...path, handle.name])) continue;
         if (path.length === 0 && handle.name.toLowerCase() === PICO_DIR.toLowerCase()) {
           continue;
         }

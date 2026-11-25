@@ -1,62 +1,51 @@
 # 3DSdex
 
-> Manage and update your Nintendo 3DS CFW SD card or local folder from the browser: Luma3DS, GodMode9, homebrew tools, and SD maintenance. A fork of [PicoDex](https://github.com/rasalopa/picodex) built for personal maintenance and educational use. No install, no backend — your files never leave your machine.
+> Audita, organiza y actualiza la tarjeta SD de tu Nintendo 3DS (o una carpeta local de trabajo/respaldo) directamente desde el navegador. Sin instalación, sin servidor y tus archivos nunca salen de tu equipo.
 
-## What it does
+- **Sitio en GitHub Pages:** https://soyandreb.github.io/3DSdex/
+- **Repositorio:** https://github.com/SoyAndreb/3DSdex
 
-- **Flexible SD or local folder selection**: open your Nintendo 3DS SD card or a local backup/working folder directly in the browser to test changes safely before touching your console.
-- **CFW & homebrew overview**: inspect key Nintendo 3DS CFW components and paths (`boot.firm`, `boot.3dsx`, `/luma/`, `/gm9/`, `/3ds/`, `/cias/`), with strict protection for `/Nintendo 3DS/` and `/boot9strap/`.
-- **SD health & cleanup**: detects OS junk files (such as `._*`, `.DS_Store`, `.fseventsd` without `no_log`, `.Trashes`, and `.Spotlight-V100`), misplaced `.cia` and `.3dsx` files in the SD root, and missing essential files, with two-step confirmation before deleting anything.
-- **FBI / NSA detection rule**: if an `FBI` setup is detected without `NSA`, recommends checking out [NSA](https://github.com/tinaut1986/NSA); if `NSA` is already present, stays quiet.
-- **Browser compatibility (Chromium + Firefox)**: supports direct read/write access via the File System Access API in Chromium-based browsers, and a compatible folder mode with `.zip` export for Firefox and other browsers without directory write support.
+---
 
-Everything runs client-side. 3DSdex has no server, no accounts, and no telemetry.
+## Funcionalidades principales
 
-## Requirements
+- **Selección flexible (SD o carpeta local) + Compatibilidad Chromium y Firefox:**
+  - **Chromium (Chrome, Edge, Brave, Opera):** lectura y escritura directa con la File System Access API.
+  - **Firefox / Modo Compatible:** lectura completa en memoria y exportación de cambios en un `.zip` listo para extraer sobre la SD respetando la jerarquía de carpetas.
+- **Salud y Auditoría SD (Limpieza segura):**
+  - Clasificación en 3 categorías: *Basura del sistema operativo* (`._*`, `.DS_Store`, `.fseventsd` sin `no_log`, `.Trashes`, `.Spotlight-V100`, `LOST.DIR` vacío), *Archivos desubicados* (`.cia` → `/cias/`, `.3dsx` → `/3ds/`, `.firm` → `/luma/payloads/`) y *Residuos opcionales* (`.bak`, logs, `.cia` antiguos).
+  - Cálculo de espacio total a liberar, selección por elemento y confirmación en dos pasos.
+  - Protección estricta sobre `/Nintendo 3DS/` y `/boot9strap/`.
+  - **Regla FBI / NSA:** recomienda instalar [NSA](https://github.com/tinaut1986/NSA) únicamente si detecta carpeta de FBI y no existe `/nsa/`.
+- **CFW y Arranque (SHA-256 + Respaldo seguro):**
+  - Verifica Luma3DS (`/boot.firm`), Homebrew Launcher (`/boot.3dsx`), GodMode9 (`/luma/payloads/*GodMode9*.firm`) y utilidades clave.
+  - Respaldo automático en `/luma/backups/3dsdex/` y verificación SHA-256 post-escritura antes de confirmar cualquier sobrescritura.
+- **Homebrew (Universal-DB):**
+  - Explora el catálogo de Universal-DB (con caché local y fallback offline), cruza con lo instalado en la SD e instala o actualiza `.3dsx`, `.cia` y `.firm` en su ruta estándar.
+- **TM++ (TWiLight Menu++ y carátulas automáticas):**
+  - Detecta TWiLight Menu++ y descarga carátulas faltantes desde `libretro-thumbnails` guardándolas en `/_nds/TWiLightMenu/boxart/`.
 
-- **Browsers**:
-  - **Chromium-based browsers** (Chrome, Edge, Brave, Opera) for direct folder/SD access via the File System Access API.
-  - **Firefox** (and other browsers without directory write support) via compatible folder mode with `.zip` export.
-- **Storage target**: a Nintendo 3DS SD card (Old/New 3DS with CFW) or a local copy/working folder.
+---
 
-## Using it
+## Despliegue automático en GitHub Pages
 
-Run it locally:
+El repositorio incluye el workflow [`.github/workflows/deploy.yml`](.github/workflows/deploy.yml), que compila `dist/` con `GITHUB_PAGES=true` (`base: '/3DSdex/'`) y lo publica en cada `push` a `main` (o manualmente con `workflow_dispatch`).
+
+Para activarlo en GitHub:
+1. Abre el repositorio en GitHub: `https://github.com/SoyAndreb/3DSdex`.
+2. Ve a **Settings → Pages**.
+3. En **Build and deployment → Source**, selecciona **GitHub Actions**.
+4. Haz `push` a la rama `main` (o ejecuta el workflow **Deploy to GitHub Pages** desde la pestaña **Actions**).
+5. La aplicación quedará publicada en `https://soyandreb.github.io/3DSdex/`.
+
+---
+
+## Desarrollo local
 
 ```bash
-git clone https://github.com/SoyAndreb/3DSdex
-cd 3dsdex
 npm install
-npm run dev
-
-```
-
-Open the printed URL, select **your SD card or a local working/backup folder**, and run a scan.
-
-## Development
-
-```bash
-npm run dev          # dev server
-npm test             # unit tests (vitest)
+npm run dev          # servidor de desarrollo local
 npm run lint         # oxlint
-npm run format:check # prettier
-npm run build        # production build
-
+npm test             # tests unitarios (vitest)
+npm run build        # compilación de producción (dist/)
 ```
-
-Core logic lives in `src/lib/` (`sd3ds.ts`, `sdAudit.ts`, `compatFs.ts`, `zipExport.ts`) alongside state management in `src/state/` and views in `src/views/`.
-
-## Current Status
-
-* **Phase 1 & Phase 2 completed**: 3DSdex rebranding, flexible SD/local folder picker, Chromium + Firefox compatibility (`compatFs.ts` and `zipExport.ts`), protected system paths, SD health auditing, and FBI/NSA detection logic.
-* **Upcoming phases**: SHA-256 CFW release verification (`Luma3DS`, `GodMode9`, Homebrew Launcher), safe pre-overwrite backups (`safeBackup.ts`), homebrew/payload management, and Luma screenshot support.
-
-## Acknowledgements
-
-* [rasalopa/picodex](https://github.com/rasalopa/picodex) for the original project architecture and UI foundation.
-* [3ds.hacks.guide](https://3ds.hacks.guide/) for Nintendo 3DS CFW layout and best-practice documentation.
-* [tinaut1986/NSA](https://github.com/tinaut1986/NSA) for the NSA title manager project.
-
-## License
-
-[MIT](https://www.google.com/search?q=LICENSEMIT)

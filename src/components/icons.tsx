@@ -147,6 +147,17 @@ export function IconClock(props: IconProps) {
   );
 }
 
+/** Backups: a storage box with a lid line. */
+export function IconArchive(props: IconProps) {
+  return (
+    <Icon {...props}>
+      <rect x="3.5" y="4.5" width="17" height="15" rx="2" />
+      <path d="M3.5 9h17" />
+      <path d="M10 13h4" />
+    </Icon>
+  );
+}
+
 /** Completed: a check in a circle. */
 export function IconCheckCircle(props: IconProps) {
   return (

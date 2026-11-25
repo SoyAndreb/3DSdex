@@ -1,0 +1,131 @@
+.cfw-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+  gap: 0.85rem;
+}
+
+.cfw-card {
+  display: flex;
+  flex-direction: column;
+  gap: 0.45rem;
+}
+
+.cfw-card__head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 0.6rem;
+  flex-wrap: nowrap;
+}
+
+.cfw-card__name {
+  font-size: 1rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cfw-card__badge {
+  flex: none;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  padding: 0.15rem 0.5rem;
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  color: var(--text-dim);
+}
+
+.cfw-card__badge--up-to-date {
+  color: var(--ok);
+  border-color: var(--ok);
+}
+
+.cfw-card__badge--outdated {
+  color: var(--warn);
+  border-color: var(--warn);
+}
+
+.cfw-card__badge--missing {
+  color: var(--accent-text);
+  border-color: var(--accent);
+}
+
+.cfw-card__meta {
+  font-size: 0.78rem;
+  color: var(--text-dim);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.cfw-card__versions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.2rem 1rem;
+  font-size: 0.85rem;
+}
+
+.cfw-card__version {
+  white-space: nowrap;
+}
+
+.cfw-card__label {
+  color: var(--text-dim);
+}
+
+.cfw-card__source,
+.cfw-card__hash {
+  margin: 0;
+  font-size: 0.72rem;
+  color: var(--text-dim);
+}
+
+.cfw-card__hash code {
+  word-break: break-all;
+}
+
+.cfw-card__actions {
+  margin-top: auto;
+  padding-top: 0.6rem;
+  border-top: 1px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 0.6rem;
+}
+
+.cfw-card__button {
+  white-space: nowrap;
+}
+
+.cfw-card__link {
+  flex: none;
+  white-space: nowrap;
+  font-size: 0.8rem;
+  color: var(--accent-text);
+  text-decoration: none;
+}
+
+.cfw-card__link:hover {
+  text-decoration: underline;
+}
+
+/* nds-bootstrap is a separate component from TWiLight Menu++. */
+.cfw-bootstrap {
+  display: flex;
+  flex-direction: column;
+  gap: 0.4rem;
+}
+
+.cfw-bootstrap__head,
+.cfw-bootstrap__versions {
+  display: flex;
+  align-items: center;
+  gap: 0.6rem;
+  flex-wrap: wrap;
+}
+
+.cfw-bootstrap__versions {
+  font-size: 0.85rem;
+}

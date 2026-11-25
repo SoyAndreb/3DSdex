@@ -77,6 +77,32 @@ describe('audit3dsCard', () => {
     expect(audit.junkDirs).toEqual([{ name: '.fseventsd', preventionOnly: false }]);
   });
 
+  it('detects loose .firm payloads, leftovers (.bak, logs, .cia), and empty LOST.DIR', async () => {
+    const compat = createCompatRootFromFiles([
+      fakeFile('SD_3DS/boot.firm', 'luma'),
+      fakeFile('SD_3DS/boot.firm.bak', 'old-luma'),
+      fakeFile('SD_3DS/lumaupdater.log', 'log'),
+      fakeFile('SD_3DS/GodMode9.firm', 'gm9'),
+      fakeFile('SD_3DS/cias/old_installer.cia', 'cia'),
+    ]);
+    // Create an empty LOST.DIR directory
+    await compat.handle.getDirectoryHandle('LOST.DIR', { create: true });
+
+    const audit = await audit3dsCard(compat.handle);
+    expect(audit.emptyLostDir).toBe(true);
+    expect(audit.misplacedFiles).toHaveLength(1);
+    expect(audit.misplacedFiles[0]).toMatchObject({
+      name: 'GodMode9.firm',
+      kind: 'firm',
+      suggestedDir: 'luma/payloads',
+    });
+    expect(audit.leftovers.map((l) => l.name).sort()).toEqual([
+      'boot.firm.bak',
+      'lumaupdater.log',
+      'old_installer.cia',
+    ]);
+  });
+
   it('suppresses NSA recommendation when both fbi/ and nsa/ exist (like reference SD)', async () => {
     const compat = createCompatRootFromFiles([
       fakeFile('SD_3DS/boot.firm', 'luma'),
@@ -88,5 +114,22 @@ describe('audit3dsCard', () => {
     expect(audit.fbiNsa.hasFbiDir).toBe(true);
     expect(audit.fbiNsa.hasNsaDir).toBe(true);
     expect(audit.fbiNsa.recommendNsa).toBe(false);
+  });
+
+  it('never reports cleanup candidates inside critical folders, with any casing', async () => {
+    const compat = createCompatRootFromFiles([
+      fakeFile('SD/boot.firm', 'luma'),
+      fakeFile('SD/fbi/lasturls', 'fbi'),
+      fakeFile('SD/nintendo 3ds/._apple', 'keep'),
+      fakeFile('SD/BOOT9STRAP/boot9strap.firm', 'keep'),
+      fakeFile('SD/.DS_Store', 'junk'),
+    ]);
+    const audit = await audit3dsCard(compat.handle);
+    const paths = [...audit.junkFiles, ...audit.leftovers, ...audit.misplacedFiles]
+      .map((item) => `${'path' in item ? item.path.join('/') : ''}/${item.name}`.toLowerCase())
+      .join('|');
+    expect(paths).not.toContain('nintendo 3ds');
+    expect(paths).not.toContain('boot9strap');
+    expect(audit.fbiNsa.url).toBe(NSA_REPO_URL);
   });
 });

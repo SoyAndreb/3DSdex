@@ -25,6 +25,7 @@ import {
   type CompatRootState,
   type FsMode,
 } from '../lib/compatFs';
+import type { ChangePlan } from '../lib/changePlan';
 import {
   inspect3dsCardOverview,
   looksLike3dsSd,
@@ -130,6 +131,11 @@ export interface SdState {
   compatChanges: CompatChangeSummary | null;
   /** Refreshes `compatChanges` after a compat-mode write or delete. */
   notifyCompatWrite: () => void;
+  /**
+   * Records the last dry-run plan. In compatible mode it becomes the
+   * `3DSDEX_CAMBIOS.txt` manifest inside the exported `.zip`.
+   */
+  notePlan: (plan: ChangePlan) => void;
   /** Opens a local folder / SD card in compat mode from a FileList. */
   openCompatFiles: (files: Iterable<File>) => Promise<void>;
   /** Downloads pending compat-mode changes as a `.zip` preserving SD paths. */
@@ -337,6 +343,10 @@ export function SdProvider({ children }: { children: ReactNode }) {
     }
   }, []);
 
+  const notePlan = useCallback((plan: ChangePlan) => {
+    compatStateRef.current?.notePlan(plan);
+  }, []);
+
   const openCompatFiles = useCallback(
     async (files: Iterable<File>) => {
       setError(null);
@@ -481,6 +491,7 @@ export function SdProvider({ children }: { children: ReactNode }) {
       fsMode,
       compatChanges,
       notifyCompatWrite,
+      notePlan,
       openCompatFiles,
       exportCompatZip,
       loaderLists,
@@ -511,6 +522,7 @@ export function SdProvider({ children }: { children: ReactNode }) {
       fsMode,
       compatChanges,
       notifyCompatWrite,
+      notePlan,
       openCompatFiles,
       exportCompatZip,
       loaderLists,

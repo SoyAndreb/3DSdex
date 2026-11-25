@@ -15,6 +15,7 @@ import {
   type SaveFile,
 } from './health.ts';
 import { validateLauncherCoverBmp, type CoverLauncher } from './bmp.ts';
+import { isCriticalSystemPath } from './criticalPaths.ts';
 import { COVERS, MAX_SCAN_DEPTH, PICO_DIR, isAccessError, listEntries } from './sdcard.ts';
 
 export { MAX_SCAN_DEPTH } from './sdcard.ts';
@@ -171,6 +172,7 @@ export async function scanCard(
       }
       if (path.length < MAX_SCAN_DEPTH) {
         const childPath = [...path, handle.name];
+        if (isCriticalSystemPath(childPath)) continue;
         try {
           await walk(handle, childPath);
         } catch (e) {

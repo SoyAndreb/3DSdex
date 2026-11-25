@@ -3,7 +3,7 @@ import { formatCount, parseRepoStats, REPO_URL, repoSlug } from './repo';
 
 describe('repoSlug', () => {
   it('reads owner/name from the repository URL', () => {
-    expect(repoSlug(REPO_URL)).toBe('rasalopa/picodex');
+    expect(repoSlug(REPO_URL)).toBe('SoyAndreb/3DSdex');
   });
 
   it('accepts a trailing slash or .git', () => {

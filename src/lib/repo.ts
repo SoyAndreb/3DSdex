@@ -7,7 +7,7 @@
  * GitHub for them, so they are as fresh as the last deploy.
  */
 
-export const REPO_URL = 'https://github.com/rasalopa/picodex';
+export const REPO_URL = 'https://github.com/SoyAndreb/3DSdex';
 
 export interface RepoStats {
   stars: number;

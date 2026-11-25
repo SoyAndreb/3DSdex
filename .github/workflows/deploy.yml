@@ -3,10 +3,6 @@ name: Deploy to GitHub Pages
 on:
   push:
     branches: [main]
-  # a daily rebuild refreshes the star and fork counts on the header card, which
-  # vite.config.ts reads at build time; 06:17 UTC is 00:17 in Mexico City
-  schedule:
-    - cron: '17 6 * * *'
   workflow_dispatch:
 
 permissions:
@@ -28,11 +24,11 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
+      - run: npm run lint
+      - run: npm test
       - run: npm run build
         env:
-          # project pages are served from /<repo>/
-          VITE_BASE: /picodex/
-          # vite.config.ts reads the header card's star and fork counts with it
+          GITHUB_PAGES: "true"
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       - uses: actions/upload-pages-artifact@v3
         with:

@@ -86,7 +86,7 @@ describe('CHANGELOG data', () => {
     }
   });
 
-  it('points at the picodex repository', () => {
-    expect(REPO_URL).toBe('https://github.com/rasalopa/picodex');
+  it('points at the 3DSdex repository', () => {
+    expect(REPO_URL).toBe('https://github.com/SoyAndreb/3DSdex');
   });
 });

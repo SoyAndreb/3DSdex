@@ -6,11 +6,15 @@ import { useTheme } from './state/theme';
 import { LANGUAGES, LanguageProvider, useLang, useT, type Lang } from './i18n';
 import { resolveSdMessage } from './i18n/messages';
 import type { Dict } from './i18n/en';
+import { BackupsView } from './views/BackupsView';
 import { CfwOverviewView } from './views/CfwOverviewView';
 import { Health3dsView } from './views/Health3dsView';
+import { HomebrewView } from './views/HomebrewView';
+import { TwilightView } from './views/TwilightView';
 import { Changelog } from './components/Changelog';
 import { RepoCard } from './components/RepoCard';
 import {
+  IconArchive,
   IconChart,
   IconFolder,
   IconGrid,
@@ -25,13 +29,16 @@ import {
 import { nextThemePick, type ThemePick } from './lib/theme';
 import './App.css';
 
-type Tab = 'health' | 'cfw';
+type Tab = 'health' | 'cfw' | 'homebrew' | 'twilight' | 'backups';
 
 type IconComponent = ComponentType<{ className?: string }>;
 
 const TABS: { id: Tab; label: (t: Dict) => string; Icon: IconComponent }[] = [
   { id: 'health', label: (t) => t.app.tabs.health, Icon: IconPulse },
   { id: 'cfw', label: (t) => t.app.tabs.library, Icon: IconGrid },
+  { id: 'homebrew', label: (t) => t.dex3ds.tabHomebrew, Icon: IconFolder },
+  { id: 'twilight', label: (t) => t.dex3ds.tabTwilight, Icon: IconImage },
+  { id: 'backups', label: (t) => t.dex3ds.tabBackups, Icon: IconArchive },
 ];
 
 const FEATURES: {
@@ -274,6 +281,8 @@ function Workspace() {
             {compatChanges && (
               <span style={{ fontSize: '0.8rem', color: 'var(--text-dim)' }}>
                 {t.dex3ds.compatPending(compatChanges.written.length, compatChanges.deleted.length)}
+                {compatChanges.blocked.length > 0 &&
+                  ` · ${t.dex3ds.previewBlocked(compatChanges.blocked.length)}`}
               </span>
             )}
           </div>
@@ -299,6 +308,9 @@ function Workspace() {
       <main className="app__content">
         {activeTab === 'health' && <Health3dsView />}
         {activeTab === 'cfw' && <CfwOverviewView />}
+        {activeTab === 'homebrew' && <HomebrewView />}
+        {activeTab === 'twilight' && <TwilightView />}
+        {activeTab === 'backups' && <BackupsView />}
       </main>
     </>
   );
@@ -378,7 +390,7 @@ function Shell() {
           its own line and the separators between groups hide (see App.css) */}
       <footer className="app__footer">
         <span className="app__footer-group">
-          <a href="https://github.com/rasalopa/picodex" target="_blank" rel="noreferrer">
+          <a href="https://github.com/SoyAndreb/3DSdex" target="_blank" rel="noreferrer">
             GitHub
           </a>
           <span aria-hidden="true">·</span>

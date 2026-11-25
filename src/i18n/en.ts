@@ -86,12 +86,10 @@ export const en = {
       `3DSdex needs your permission to open ${name}. Press Open ${name} again and allow access when your browser asks.`,
     noPicoAnymore:
       "3DSdex can't find that folder any more. Connect your SD card or pick your local folder again.",
-    noPicoPickRoot:
-      "3DSdex couldn't recognize a 3DS SD card or backup folder there.",
-    noPicoOnCard:
-      "3DSdex couldn't save your change because the folder is no longer accessible.",
+    noPicoPickRoot: "3DSdex couldn't recognize a 3DS SD card or backup folder there.",
+    noPicoOnCard: "3DSdex couldn't save your change because the folder is no longer accessible.",
     not3dsAnymore:
-      "3DSdex no longer recognizes a 3DS SD card or backup folder there. Connect it again and press Reload.",
+      '3DSdex no longer recognizes a 3DS SD card or backup folder there. Connect it again and press Reload.',
     not3dsPickRoot:
       "3DSdex didn't find standard 3DS folders or boot files (like boot.firm, luma/, or Nintendo 3DS/) there. Pick the root of your SD card or local backup folder.",
     fsDenied:
@@ -676,7 +674,7 @@ export const en = {
     compatExportBtn: (count: number) =>
       count > 0 ? `Export changes (.zip · ${count})` : 'Export .zip (no changes yet)',
     compatPending: (written: number, deleted: number) =>
-      `${written} modified/added · ${deleted} marked for removal`,
+      `${written} staged changes · ${deleted} confirmed deletions (only after you confirm a preview)`,
     auditTitle: '3DS SD Audit & Health',
     auditIntro:
       'Checks critical boot files (boot.firm, boot.3dsx, GodMode9), OS junk, misplaced .cia/.3dsx files, and FBI/NSA status.',
@@ -708,9 +706,157 @@ export const en = {
     junkConfirm: (count: number) => `Delete ${count} junk item(s)?`,
     cfwPreviewTitle: 'CFW & Boot Overview',
     cfwPreviewBody:
-      'Detected structure from your SD card or local backup folder. Full SHA-256 version identification and safe backup updates arrive in Phase 3.',
+      'SHA-256 verification and GitHub Releases check for critical 3DS components, with automatic backup before overwriting.',
     protectedNote:
       'Protected folders (/Nintendo 3DS/ and /boot9strap/) are never modified or scanned for deletion.',
+    spaceToFree: (size: string) => `Space to free: ${size}`,
+    leftoversTitle: 'Leftovers & Optional Installers',
+    leftoversNone: 'No old .bak files, logs, or .cia installers found.',
+    leftoversHint:
+      'Review and select old backups, logs, or already-installed .cia files to delete.',
+    deleteSelected: (count: number, size: string) => `Delete selected (${count} · ${size})`,
+    homebrewTitle: 'Homebrew (Universal-DB)',
+    homebrewIntro:
+      'Browse 3DS homebrew from Universal-DB and install or update directly to your SD.',
+    homebrewRefresh: 'Refresh catalog',
+    homebrewSearch: 'Search apps, author, description…',
+    homebrewAllCategories: 'All categories',
+    homebrewOnlyInstalled: 'Installed on SD only',
+    installedBadge: 'Installed',
+    installBtn: 'Install',
+    updateBtn: 'Update',
+    installing: 'Downloading & verifying…',
+    tmTitle: 'TWiLight Menu++ (TM++)',
+    tmIntro: 'Check TWiLight Menu++ status and automatically download missing boxart covers.',
+    tmStatusTitle: 'TWiLight Menu++ Status',
+    tmCoversTitle: 'Automatic Boxart Covers',
+    tmCoversSummary: (total: number, covered: number, missing: number) =>
+      `${total} games found · ${covered} with cover · ${missing} missing`,
+    tmDownloadMissing: (count: number) => `Download missing covers (${count})`,
+    tmDownloading: 'Downloading covers…',
+    tmDownloadResult: (downloaded: number, notFound: number, errors: number) =>
+      `Downloaded ${downloaded} cover(s) · ${notFound} not matched · ${errors} error(s).`,
+    versionLabel: 'Version',
+    statusUpToDate: 'Up to date',
+    statusOutdated: 'Outdated',
+    statusUnrecognised: 'Unrecognised / custom',
+    statusUnknownVersion: 'No version detected',
+    statusMissing: 'Missing',
+    detectedLabel: 'Detected',
+    installedLabel: 'Installed',
+    latestLabel: 'Latest',
+    versionSourceHash: 'Version from a known SHA-256',
+    versionSourceBinary: 'Version read from the binary',
+    versionSourceFile: 'Version read from a /_nds/ file',
+    replaceWithBackup: 'Update from file (with backup)',
+    safeBackupDone: (written: string, backup: string) =>
+      `Updated /${written} safely (previous file backed up to /${backup}).`,
+    safeWriteDone: (written: string) => `Written /${written} and verified SHA-256.`,
+    bootstrapTitle: 'nds-bootstrap (independent of TWiLight Menu++)',
+    bootstrapNote:
+      'Version read only from /_nds/release-bootstrap.ver or nds-bootstrap binaries; never from TWiLight Menu++ files.',
+    utilitiesTitle: 'Detected Homebrew Utilities',
+    tabHomebrew: 'Homebrew',
+    tabTwilight: 'TM++',
+    tabBackups: 'Backups',
+    // Dry-run preview, shared by cleanup, moves, backup export and CFW writes.
+    previewTitle: 'Dry-run preview',
+    previewDirect: 'Direct mode: after confirming, these changes are applied to the SD card.',
+    previewCompat:
+      'Compatible mode: after confirming, these changes are staged in memory and listed in the exported .zip manifest.',
+    previewBlocked: (count: number) =>
+      `${count} operation(s) blocked: critical system folders are never modified.`,
+    previewEmpty: 'No permitted changes to preview.',
+    previewMore: (count: number) => `… and ${count} more.`,
+    previewCounts: (create: number, backup: number, move: number, deleted: number, size: string) =>
+      `Create: ${create} · Backup: ${backup} · Move: ${move} · Delete: ${deleted} · Size: ${size}`,
+    previewConfirm: 'Apply exactly these changes?',
+    previewYes: 'Yes, apply changes',
+    previewApplying: 'Applying…',
+    previewCancel: 'Cancel',
+    // Boot layout and Luma config inspection (read-only).
+    bootTitle: 'Boot layout & Luma config',
+    bootIntro:
+      'Read-only check of boot.firm, boot.3dsx, payloads and /luma/config.ini. Nothing here is rewritten.',
+    bootInspecting: 'Checking boot files…',
+    bootReadError: (message: string) => `Could not complete the boot check: ${message}`,
+    bootBootFirm: (size: string) => `boot.firm present at root (${size}).`,
+    bootBoot3dsx: (size: string) => `boot.3dsx present at root (${size}).`,
+    bootPayloads: (count: number) => `${count} .firm payload(s) in /luma/payloads/.`,
+    bootPayloadNone: 'No .firm payloads found in /luma/payloads/.',
+    bootDuplicates: (count: number) => `${count} duplicated payload name group(s) detected.`,
+    bootOutdated: (count: number) => `${count} payload(s) match a known older release.`,
+    bootConfigOk: (version: string) => `/luma/config.ini present (config version ${version}).`,
+    bootConfigMissing: '/luma/config.ini missing; Luma3DS creates it on first boot.',
+    bootConfigUnreadable: '/luma/config.ini could not be read.',
+    bootConfigClean: 'No unusual settings detected.',
+    bootConfigFindings: (count: number) =>
+      `${count} unusual setting(s) worth reviewing on the console.`,
+    bootConfigFinding: {
+      'missing-meta':
+        'No [meta] section: the configuration may not have been generated by Luma3DS.',
+      'missing-version': 'Missing config_version_major/minor in [meta].',
+      'unknown-version': 'Unrecognised config version: ',
+      'autoboot-emunand': 'autoboot_emunand is enabled: the console boots into emuNAND.',
+      'autoboot-mode': 'autoboot_mode is unusual: check the Luma boot menu.',
+      'pin-lock': 'A PIN lock is configured: make sure you know the code.',
+      'game-patching-off': 'Game patching is disabled; LayeredFS and translations will not load.',
+      'external-firm-off': 'External FIRM/module loading is disabled.',
+      'new3ds-cpu': 'New 3DS CPU boost is enabled on boot.',
+      'dev-unitinfo': 'Developer unit information is enabled.',
+    },
+    // Informational /3ds/ layout report. Root .3dsx launchers are normal.
+    appsTitle: 'Apps & layout in /3ds/',
+    appsIntro:
+      'Root .3dsx launchers work as-is, and folders with saves, config or caches are normal. Only genuinely empty folders, case-only duplicates and large loose files are listed; nothing is deleted unless you review a preview and confirm explicitly.',
+    appsNone: 'Nothing needs a second look.',
+    appsAppFolders: (count: number) => `${count} app folder(s)`,
+    appsRootLaunchers: (count: number) => `${count} .3dsx launcher(s) at /3ds/ root (works as-is)`,
+    appsEmptyFolders: (count: number) => `${count} empty folder(s)`,
+    appsFindingsCount: (count: number) => `${count} item(s) worth a second look`,
+    appsFinding: {
+      'empty-folder': 'empty folder: no files and no subfolders inside',
+      duplicate: 'name differs only by case from another entry',
+      'heavy-file': 'large loose file at /3ds/ root',
+    },
+    appsReview: (count: number) => `Review cleanup preview (${count})`,
+    appsShowAll: 'Show all',
+    appsShowLess: 'Show less',
+    appsCleaned: (count: number) => `Removed ${count} selected item(s) after confirmation.`,
+    // Local backup viewer.
+    backupsTitle: 'Local backups',
+    backupsIntro:
+      'Browse GodMode9 dumps, JKSV and Checkpoint saves, and 3DSdex safety backups with date and size.',
+    backupsProtected: 'Read-only: /Nintendo 3DS/ and /boot9strap/ are never included.',
+    backupsFound: (count: number, size: string) => `${count} package(s) · ${size} total`,
+    backupsNone: 'No local backup packages found on this card.',
+    backupsScanning: 'Scanning backups…',
+    backupsSelectAll: 'Select all',
+    backupsUnselectAll: 'Unselect all',
+    backupsReview: (count: number) => `Preview export (${count})`,
+    backupsExport: 'Export selected packages (.zip)',
+    backupsExported: (count: number) => `Exported ${count} backup package(s) as a .zip.`,
+    backupsFiles: (count: number) => `${count} file(s)`,
+    backupsDate: (date: string) => `Date: ${date}`,
+    backupsSource: {
+      gm9: 'GodMode9',
+      jksv: 'JKSV',
+      checkpoint: 'Checkpoint',
+      '3dsdex': '3DSdex safety backup',
+    },
+    // Post-update checklist.
+    checklistTitle: 'After updating: quick checklist',
+    checklistIntro:
+      'Check each item on the console itself. 3DSdex cannot verify what the console does after a restart.',
+    checklistZip:
+      'Compatible mode: extract the exported .zip at the ROOT of your SD card, keeping the folder paths.',
+    checklistDismiss: 'Dismiss',
+    checklistAllDone: 'All checks done.',
+    checklistPending: (count: number) => `${count} check(s) left.`,
+    checkLuma: 'Boot the console and confirm Luma3DS shows the new version in its boot menu.',
+    checkGm9: 'Hold the payload hotkey and confirm GodMode9 starts and reads the SD card.',
+    checkTwilight: 'Launch TWiLight Menu++ and confirm its version and game list.',
+    checkHbmenu: 'Open the Homebrew Launcher and confirm boot.3dsx loads.',
   },
 };
 

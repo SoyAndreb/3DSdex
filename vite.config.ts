@@ -25,15 +25,15 @@ async function readRepoStats(): Promise<RepoStats | null> {
     if (stats === null) throw new Error('the response had no star and fork counts');
     return stats;
   } catch (error) {
-    console.warn(`[picodex] repo card without counts: ${String(error)}`);
+    console.warn(`[3dsdex] repo card without counts: ${String(error)}`);
     return null;
   }
 }
 
 // https://vite.dev/config/
 export default defineConfig(async () => ({
-  // github pages serves project sites from /<repo>/; local dev stays at /
-  base: process.env.VITE_BASE ?? '/',
+  // GitHub Pages serves project sites from /3DSdex/; local/portable builds use ./
+  base: process.env.GITHUB_PAGES === 'true' ? '/3DSdex/' : './',
   plugins: [react()],
   define: {
     __REPO_STATS__: JSON.stringify(await readRepoStats()),

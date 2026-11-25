@@ -1,0 +1,114 @@
+{
+  "components": {
+    "luma3ds": {
+      "name": "Luma3DS",
+      "repo": "LumaTeam/Luma3DS",
+      "targetPath": "boot.firm",
+      "latestKnown": "v13.3.3",
+      "versionPatterns": [
+        "\\bLuma3DS\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)",
+        "\\bLuma\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)"
+      ],
+      "releases": [
+        {
+          "tag": "v13.0.2",
+          "sha256": "a1b2c3d4e5f60000000000000000000000000000000000000000000000013002"
+        },
+        {
+          "tag": "v13.1.2",
+          "sha256": "a1b2c3d4e5f60000000000000000000000000000000000000000000000013102"
+        },
+        {
+          "tag": "v13.2.1",
+          "sha256": "a1b2c3d4e5f60000000000000000000000000000000000000000000000013201"
+        },
+        {
+          "tag": "v13.3.3",
+          "sha256": "a1b2c3d4e5f60000000000000000000000000000000000000000000000013303"
+        }
+      ]
+    },
+    "hbmenu": {
+      "name": "Homebrew Launcher",
+      "repo": "devkitPro/3ds-hbmenu",
+      "targetPath": "boot.3dsx",
+      "latestKnown": "v2.4.4",
+      "versionPatterns": [
+        "\\b3DS\\s+Homebrew\\s+Menu\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)",
+        "\\bhbmenu\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)"
+      ],
+      "releases": [
+        {
+          "tag": "v2.4.1",
+          "sha256": "b1b2c3d4e5f60000000000000000000000000000000000000000000000024100"
+        },
+        {
+          "tag": "v2.4.3",
+          "sha256": "b1b2c3d4e5f60000000000000000000000000000000000000000000000024300"
+        },
+        {
+          "tag": "v2.4.4",
+          "sha256": "b1b2c3d4e5f60000000000000000000000000000000000000000000000024400"
+        }
+      ]
+    },
+    "godmode9": {
+      "name": "GodMode9",
+      "repo": "d0k3/GodMode9",
+      "targetPath": "luma/payloads/GodMode9.firm",
+      "latestKnown": "v2.1.1",
+      "versionPatterns": ["\\bGodMode9\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)"],
+      "releases": [
+        {
+          "tag": "v2.1.0",
+          "sha256": "c1b2c3d4e5f60000000000000000000000000000000000000000000000021000"
+        },
+        {
+          "tag": "v2.1.1",
+          "sha256": "c1b2c3d4e5f60000000000000000000000000000000000000000000000021100"
+        }
+      ]
+    },
+    "twilight": {
+      "name": "TWiLight Menu++",
+      "repo": "DS-Homebrew/TWiLightMenu",
+      "targetPath": "BOOT.NDS",
+      "latestKnown": "v27.14.0",
+      "versionPatterns": [
+        "\\bTWiLight\\s*Menu\\+\\+\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)",
+        "\\bTWiLight\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)"
+      ],
+      "versionFloor": "v20.0.0",
+      "versionFiles": [
+        "_nds/TWiLightMenu/version.txt",
+        "_nds/TWiLightMenu/version",
+        "_nds/TWiLightMenu/release.ver",
+        "_nds/TWiLightMenu/TWiLightMenu.ver"
+      ],
+      "releases": [
+        {
+          "tag": "v27.10.0",
+          "sha256": "d1b2c3d4e5f60000000000000000000000000000000000000000000000271000"
+        },
+        {
+          "tag": "v27.14.0",
+          "sha256": "d1b2c3d4e5f60000000000000000000000000000000000000000000000271400"
+        }
+      ]
+    }
+  },
+  "standalone": {
+    "ndsBootstrap": {
+      "name": "nds-bootstrap",
+      "repo": "DS-Homebrew/nds-bootstrap",
+      "targetPath": "_nds/release-bootstrap.ver",
+      "latestKnown": "v2.17.0",
+      "versionPatterns": [
+        "\\bnds[- ]?bootstrap\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)",
+        "\\bbootstrap\\s*v?(\\d+\\.\\d+(?:\\.\\d+)?)"
+      ],
+      "versionFiles": ["_nds/release-bootstrap.ver", "_nds/bootstrap.ver"],
+      "binaryPaths": ["_nds/bootstrap.nds"]
+    }
+  }
+}

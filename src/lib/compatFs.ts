@@ -10,6 +10,8 @@
  *   SD card folder hierarchy.
  */
 
+import { planManifestLines, type ChangePlan } from './changePlan.ts';
+import { assertNotCriticalPath, isCriticalSystemPath } from './criticalPaths.ts';
 import { buildZip, type ZipEntryInput } from './zipExport.ts';
 
 export type FsMode = 'direct' | 'compat';
@@ -17,12 +19,18 @@ export type FsMode = 'direct' | 'compat';
 export interface CompatChangeSummary {
   written: string[];
   deleted: string[];
+  /** Mutating operations rejected by the critical-system whitelist. */
+  blocked: string[];
+  /** How many operations were included in the last planned dry-run. */
+  plannedCount: number;
 }
 
 export interface CompatRootState {
   rootName: string;
   handle: FileSystemDirectoryHandle;
   getChanges: () => CompatChangeSummary;
+  /** Records a dry-run plan so the exported ZIP carries its manifest. */
+  notePlan: (plan: ChangePlan) => void;
   exportZip: () => Promise<Uint8Array<ArrayBuffer>>;
 }
 
@@ -63,6 +71,8 @@ class CompatFileHandle {
   }
 
   async createWritable(): Promise<FileSystemWritableFileStream> {
+    // Critical folders are readable in compatible mode but never writable.
+    assertNotCriticalPath(this.relPath);
     const chunks: Uint8Array[] = [];
     const commit = (bytes: Uint8Array) => {
       this.writtenBytes = bytes;
@@ -164,6 +174,7 @@ class CompatDirectoryHandle {
       return entry as unknown as FileSystemDirectoryHandle;
     }
     if (options?.create) {
+      assertNotCriticalPath(this.childPath(name));
       const created = new CompatDirectoryHandle(name, this.childPath(name), this.tracker);
       this.children.set(name, created);
       return created as unknown as FileSystemDirectoryHandle;
@@ -185,6 +196,7 @@ class CompatDirectoryHandle {
     }
     if (options?.create) {
       const path = this.childPath(name);
+      assertNotCriticalPath(path);
       const created = new CompatFileHandle(name, path, null, (p, b) =>
         this.tracker.markWritten(p, b),
       );
@@ -195,6 +207,7 @@ class CompatDirectoryHandle {
   }
 
   async removeEntry(name: string, options?: FileSystemRemoveOptions): Promise<void> {
+    assertNotCriticalPath(this.childPath(name));
     const existingKey = this.findChildKey(name);
     if (existingKey === undefined) {
       throw makeDomError('NotFoundError', `Entry not found: ${name}`);
@@ -237,29 +250,63 @@ class CompatDirectoryHandle {
 class CompatChangeTracker {
   private readonly written = new Map<string, Uint8Array>();
   private readonly deleted = new Set<string>();
+  private readonly blocked = new Set<string>();
+  private plan: ChangePlan = { changes: [], blocked: [] };
 
   markWritten(relPath: string, bytes: Uint8Array): void {
+    if (isCriticalSystemPath(relPath)) {
+      this.blocked.add(relPath);
+      return;
+    }
     this.deleted.delete(relPath);
     this.written.set(relPath, bytes);
   }
 
   markDeleted(relPath: string): void {
+    if (isCriticalSystemPath(relPath)) {
+      this.blocked.add(relPath);
+      return;
+    }
     this.written.delete(relPath);
     this.deleted.add(relPath);
+  }
+
+  /** Records a dry-run plan for the ZIP manifest and reports blocked paths. */
+  notePlan(plan: ChangePlan): void {
+    this.plan = plan;
+    for (const change of plan.blocked) {
+      this.blocked.add(change.path);
+    }
   }
 
   summary(): CompatChangeSummary {
     return {
       written: Array.from(this.written.keys()).sort(),
       deleted: Array.from(this.deleted).sort(),
+      blocked: Array.from(this.blocked).sort(),
+      plannedCount: this.plan.changes.length,
     };
   }
 
   async buildExportZip(): Promise<Uint8Array<ArrayBuffer>> {
     const entries: ZipEntryInput[] = [];
     for (const [path, data] of this.written.entries()) {
+      // Defense in depth: a critical path never reaches the archive.
+      if (isCriticalSystemPath(path)) continue;
       entries.push({ path, data });
     }
+
+    const manifest = planManifestLines(
+      this.plan,
+      'compat',
+      'IMPORTANTE: extrae este .zip en la RAÍZ de la SD (o de tu copia local), manteniendo las rutas. ' +
+        'Los archivos marcados para eliminar deben borrarse a mano: un .zip solo agrega o sobrescribe.',
+    );
+    entries.push({
+      path: '3DSDEX_CAMBIOS.txt',
+      data: new TextEncoder().encode(manifest.join('\n')),
+    });
+
     if (this.deleted.size > 0) {
       const lines = [
         '3DSdex — Archivos marcados para eliminar en modo compatible (Firefox)',
@@ -306,6 +353,7 @@ export function createCompatRootFromFiles(files: Iterable<File>): CompatRootStat
     rootName,
     handle: root as unknown as FileSystemDirectoryHandle,
     getChanges: () => tracker.summary(),
+    notePlan: (plan: ChangePlan) => tracker.notePlan(plan),
     exportZip: () => tracker.buildExportZip(),
   };
 }
